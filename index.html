@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time Tracker Elegant</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Time Tracker">
+    
+    <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%239e6b26'><rect width='512' height='512' rx='120' fill='%232d1b07'/><circle cx='256' cy='280' r='140' fill='none' stroke='%23fdfbf7' stroke-width='24'/><path d='M256 140v140h100' fill='none' stroke='%239e6b26' stroke-width='20' stroke-linecap='round'/><circle cx='256' cy='280' r='16' fill='%239e6b26'/><path d='M220 60h72M256 60v40' fill='none' stroke='%23fdfbf7' stroke-width='24' stroke-linecap='round'/><path d='M370 100l30 30' fill='none' stroke='%23fdfbf7' stroke-width='20' stroke-linecap='round'/></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%239e6b26'><rect width='512' height='512' rx='120' fill='%232d1b07'/><circle cx='256' cy='280' r='140' fill='none' stroke='%23fdfbf7' stroke-width='24'/><path d='M256 140v140h100' fill='none' stroke='%239e6b26' stroke-width='20' stroke-linecap='round'/><circle cx='256' cy='280' r='16' fill='%239e6b26'/><path d='M220 60h72M256 60v40' fill='none' stroke='%23fdfbf7' stroke-width='24' stroke-linecap='round'/><path d='M370 100l30 30' fill='none' stroke='%23fdfbf7' stroke-width='20' stroke-linecap='round'/></svg>">
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            text-align: center;
+            background-color: #f4ebd9; 
+            color: #2d1b07; 
+            padding: 15px;
+            margin: 0;
+            transition: direction 0.3s ease;
+        }
+        
+        body.rtl { direction: rtl; }
+        body.ltr { direction: ltr; }
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: #fdfbf7; 
+            padding: 25px 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(45, 27, 7, 0.08);
+            border: 1px solid #e6dcbf;
+            position: relative;
+        }
+        
+        .settings-icon {
+            position: absolute;
+            top: 22px;
+            font-size: 22px;
+            cursor: pointer;
+            background: #f6f0e3;
+            border: 1px solid #e6dcbf;
+            padding: 5px 8px;
+            border-radius: 8px;
+            z-index: 10;
+            color: #9e6b26;
+            transition: background 0.2s;
+        }
+        .settings-icon:active { background: #e6dcbf; }
+        body.rtl .settings-icon { left: auto; right: 20px; }
+        body.ltr .settings-icon { right: auto; left: 20px; }
+
+        h1 { color: #2d1b07; margin-top: 0; margin-bottom: 20px; font-size: 24px; font-weight: 700; }
+        
+        .dashboard {
+            background: #f6f0e3;
+            border: 1px solid #e6dcbf;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+            display: flex;
+            justify-content: space-around;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .time-val { color: #9e6b26; font-size: 20px; display:block; margin-top: 4px; font-weight: 800; letter-spacing: 0.5px; font-variant-numeric: tabular-nums; }
+
+        /* Große Gesamtzeitanzeige für das Finale */
+        .final-dashboard-headline {
+            background: #f6f0e3;
+            border: 1px solid #e6dcbf;
+            padding: 20px 15px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .final-time-big {
+            color: #9e6b26;
+            font-size: 38px;
+            display: block;
+            margin-top: 8px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        #settings-overlay, #setup-overlay, #confirm-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(45, 27, 7, 0.5);
+            z-index: 6000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .modal-box {
+            background: #fdfbf7;
+            padding: 25px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            border: 1px solid #e6dcbf;
+            position: relative;
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 15px;
+            font-size: 14px;
+            font-weight: bold;
+            background: #f6f0e3;
+            border: 1px solid #e6dcbf;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            color: #70583d;
+            transition: background 0.2s;
+        }
+        .modal-close-btn:active { background: #e6dcbf; }
+        body.rtl .modal-close-btn { left: 15px; }
+        body.ltr .modal-close-btn { right: 15px; }
+
+        .setup-group {
+            background: #f6f0e3;
+            border: 1px solid #e6dcbf;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        body.rtl .setup-group { text-align: right; }
+        body.ltr .setup-group { text-align: left; }
+        
+        .setup-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #2d1b07; }
+        
+        input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            font-size: 15px;
+            border: 1px solid #e6dcbf;
+            border-radius: 6px;
+            box-sizing: border-box;
+            background: #fdfbf7;
+            color: #2d1b07;
+        }
+
+        input[type="number"]::placeholder {
+            color: #b0a48a;
+            opacity: 0.75;
+            font-size: 14px;
+        }
+
+        button.start-btn {
+            background: #9e6b26;
+            color: #fdfbf7;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            font-size: 17px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(158, 107, 3, 0.2);
+            transition: opacity 0.2s;
+        }
+        button.start-btn:active { opacity: 0.9; }
+
+        /* Stil für die Tasten im Bestätigungs-Overlay */
+        .confirm-btn-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .confirm-btn-yes {
+            background: #d9534f;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-weight: bold;
+            border-radius: 8px;
+            flex: 1;
+            cursor: pointer;
+            font-size: 15px;
+        }
+        .confirm-btn-no {
+            background: #f6f0e3;
+            color: #2d1b07;
+            border: 1px solid #e6dcbf;
+            padding: 12px;
+            font-weight: bold;
+            border-radius: 8px;
+            flex: 1;
+            cursor: pointer;
+            font-size: 15px;
+        }
+        .confirm-btn-yes:active, .confirm-btn-no:active { opacity: 0.85; }
+
+        @keyframes strong-pulse {
+            0% { transform: scale(1); box-shadow: 0 4px 10px rgba(158, 107, 3, 0.15); }
+            50% { transform: scale(1.04); box-shadow: 0 8px 25px rgba(158, 107, 3, 0.45); }
+            100% { transform: scale(1); box-shadow: 0 4px 10px rgba(158, 107, 3, 0.15); }
+        }
+
+        .pulse-attention {
+            animation: strong-pulse 1.6s infinite ease-in-out; 
+            display: inline-block;
+        }
+
+        .tabs-wrapper {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            padding: 0 5px;
+            margin-bottom: -1px;
+            position: relative;
+            z-index: 2;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+        .tabs-wrapper::-webkit-scrollbar { display: none; }
+
+        .tab-item {
+            flex: 0 0 auto;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: bold;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            background: #e2d7be;
+            border: 1px solid #e6dcbf;
+            border-bottom: none;
+            color: #70583d;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        
+        .tab-item.active-tab {
+            background: #f6f0e3;
+            color: #2d1b07;
+            border-color: #e6dcbf;
+            border-bottom: 1px solid #f6f0e3;
+            padding-bottom: 11px;
+            font-weight: 800;
+        }
+        
+        .tab-item.completed-tab { background: #9e6b26; color: #fdfbf7; border-color: #9e6b26; opacity: 0.8; }
+        .tab-item.locked-tab { background: #e6dcbf; color: #a69c83; cursor: not-allowed; opacity: 0.5; }
+
+        .active-content-box {
+            border: 1px solid #e6dcbf;
+            border-radius: 12px;
+            border-top-left-radius: 4px; 
+            border-top-right-radius: 4px;
+            padding: 20px;
+            background: #f6f0e3;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 4px 15px rgba(45, 27, 7, 0.02);
+        }
+        body.rtl .active-content-box { text-align: right; }
+        body.ltr .active-content-box { text-align: left; }
+
+        .page-title-setup {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2d1b07;
+        }
+
+        .light-setup-btn {
+            font-size: 13px;
+            font-weight: 600;
+            color: #9e6b26;
+            background: #fdfbf7;
+            border: 1px solid #e6dcbf;
+            padding: 8px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .light-setup-btn:active { background: #e6dcbf; transform: scale(0.95); }
+        
+        .light-setup-btn.placeholder-style {
+            background: #f1ebd9;
+            color: #70583d;
+            border: 1px dashed #ba833c;
+        }
+
+        .page-title-centered {
+            font-size: 18px;
+            font-weight: 800;
+            color: #2d1b07;
+            text-align: center;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e6dcbf;
+            display: block;
+        }
+
+        .sections-list { display: flex; flex-direction: column; gap: 10px; margin-top: 5px; }
+
+        .section-item {
+            background: #fdfbf7;
+            color: #2d1b07;
+            border: 1px solid #e6dcbf;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+        .section-item.locked { background: #f1ebd9; color: #a69c83; border-style: dashed; }
+        .section-item.done { background: #9e6b26 !important; color: #fdfbf7; opacity: 0.8; }
+
+        /* OVERLAY */
+        #click-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #fdfbf7; 
+            z-index: 9999;
+            box-sizing: border-box;
+            padding: 20px;
+            flex-direction: column;
+            justify-content: space-between; 
+            align-items: center;
+        }
+        
+        .overlay-top-row {
+            display: flex;
+            direction: ltr !important; 
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 450px;
+            margin-top: 10px;
+            gap: 10px;
+        }
+
+        .overlay-header { 
+            font-size: 19px; 
+            font-weight: 800; 
+            color: #2d1b07; 
+            text-align: center;
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .abort-btn {
+            background: #f6f0e3; 
+            color: #70583d; 
+            border: 1px solid #e6dcbf;
+            padding: 8px 18px; 
+            border-radius: 20px; 
+            font-size: 13px; 
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+        .abort-btn:active { background: #e6dcbf; }
+
+        .minus-btn {
+            background: #d9534f; 
+            color: #fdfbf7;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(217, 83, 79, 0.3);
+            user-select: none; -webkit-user-select: none;
+            outline: none !important; -webkit-tap-highlight-color: transparent !important;
+            transition: transform 0.1s;
+        }
+        .minus-btn:active { transform: scale(0.9); }
+
+        .timer-display-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 30px;
+            margin-bottom: auto; 
+            gap: 12px;
+        }
+
+        .overlay-section-timer {
+            font-size: 72px; 
+            font-weight: 300; 
+            color: #9e6b26; 
+            letter-spacing: 1px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .pause-btn {
+            background: #f6f0e3;
+            color: #2d1b07;
+            border: 1px solid #e6dcbf;
+            border-radius: 30px;
+            padding: 8px 24px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .pause-btn:active { transform: scale(0.95); }
+        .pause-btn.paused { 
+            background: #9e6b26; 
+            color: #fdfbf7;
+            border-color: #ba833c;
+            box-shadow: 0 4px 12px rgba(158, 107, 3, 0.3); 
+        }
+
+        .giant-circle-btn {
+            width: 82vw; height: 82vw; max-width: 330px; max-height: 330px;
+            border-radius: 50%; border: none;
+            display: flex; flex-direction: column; justify-content: space-between; align-items: center;
+            box-shadow: 0 10px 30px rgba(45, 27, 7, 0.12); cursor: pointer;
+            padding: 35px 20px; box-sizing: border-box;
+            user-select: none; -webkit-user-select: none;
+            outline: none !important; -webkit-tap-highlight-color: transparent !important;
+            margin-bottom: 30px; 
+            transition: transform 0.1s, opacity 0.2s;
+        }
+        .giant-circle-btn:active { transform: scale(0.96); }
+        .giant-circle-btn.disabled-state { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+        
+        .circle-round-5 { background-color: #f1ebd9 !important; color: #2d1b07; border: 2px solid #e6dcbf; }
+        .circle-round-4 { background-color: #e2d7be !important; color: #2d1b07; }
+        .circle-round-3 { background-color: #9e6b26 !important; color: #fdfbf7; }
+
+        .circle-top-target { font-size: 19px; font-weight: 800; letter-spacing: 0.5px; }
+        .counter-big { font-size: 115px; font-weight: 900; line-height: 1; }
+        .circle-bottom-info { font-size: 14px; font-weight: bold; opacity: 0.8; }
+
+        #final-screen { display: none; background: #fdfbf7; margin-top: 10px; }
+        
+        .page-report-item { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 12px 5px; 
+            border-bottom: 1px dashed #e6dcbf; 
+            font-size: 16px;
+        }
+        .page-report-item strong { color: #9e6b26; font-variant-numeric: tabular-nums; }
+
+        .share-elegant-btn {
+            background: #fdfbf7;
+            color: #2d1b07;
+            border: 1px solid #e6dcbf;
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 18px;
+            box-shadow: 0 4px 12px rgba(45, 27, 7, 0.03);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: background 0.2s;
+        }
+        .share-elegant-btn:active { background: #e6dcbf; }
+        
+        .share-icon-svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: #9e6b26;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        #video-wake-lock {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0.01;
+            pointer-events: none;
+        }
+        
+        .clear-cache-btn {
+            background: #d9534f;
+            color: #fdfbf7;
+            border: none;
+            width: 100%;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 25px;
+            opacity: 0.85;
+        }
+        .clear-cache-btn:active { opacity: 1; }
+    </style>
+</head>
+<body class="rtl"> 
+
+<video id="video-wake-lock" playsinline muted loop></video>
+
+<div class="container" id="main-app">
+    <button class="settings-icon" onclick="openSettings()">⚙️</button>
+
+    <h1 id="txt-title">⏱️ متعقب التوقيت</h1>
+    
+    <div class="dashboard" id="normal-dashboard">
+        <div><span id="txt-global-time">الوقت الكلي</span>:<span id="global-timer" class="time-val">00:00</span></div>
+        <div><span id="txt-page-time">Thumon الحالي</span>:<span id="page-timer" class="time-val">00:00</span></div>
+    </div>
+
+    <div class="final-dashboard-headline" id="final-dashboard" style="display: none;">
+        <span id="txt-final-global-title">الوقت الكلي</span>
+        <span id="final-global-timer-big" class="final-time-big">00:00</span>
+    </div>
+
+    <div id="session-area">
+        <div class="tabs-wrapper" id="tabs-container"></div>
+        <div class="active-content-box" id="active-tab-content"></div>
+    </div>
+
+    <div id="final-screen">
+        <h2 style="color:#9e6b26; margin-top: 10px;" id="txt-finished">🎉 انتهت الجلسة!</h2>
+        <p id="txt-report-desc">إليك تقرير الأداء اليوم:</p>
+        
+        <div id="page-reports-list"></div>
+        
+        <button class="share-elegant-btn" onclick="shareToWhatsApp()">
+            <svg class="share-icon-svg" viewBox="0 0 24 24">
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+            <span id="txt-share-wa">Ergebnis teilen / مشاركة النتيجة</span>
+        </button>
+
+        <button class="start-btn" style="background:#2d1b07; color: #fdfbf7; margin-top:20px;" onclick="triggerNewSessionConfirm()" id="txt-new-session">بدء جلسة جديدة</button>
+    </div>
+</div>
+
+<div id="settings-overlay">
+    <div class="modal-box">
+        <button class="modal-close-btn" onclick="cancelSettings()">✕</button>
+        <h3 style="margin-top:15px;" id="txt-sett-title">Settings</h3>
+        
+        <div class="setup-group">
+            <label for="lang-select">Language / اللغة</label>
+            <select id="lang-select" onchange="changeLanguage(this.value)">
+                <option value="ar" selected>العربية (Arabic)</option>
+                <option value="de">Deutsch (German)</option>
+                <option value="en">English</option>
+                <option value="fr">Français (French)</option>
+                <option value="es">Español (Spanish)</option>
+                <option value="it">Italiano (Italian)</option>
+            </select>
+        </div>
+
+        <div class="setup-group">
+            <label for="input-pages" id="txt-sett-pages-label">كم عدد الأثمان?</label>
+            <input type="number" id="input-pages" min="1" max="50" placeholder="">
+        </div>
+
+        <button class="start-btn pulse-attention" onclick="closeSettings()" id="txt-sett-save">حفظ</button>
+        
+        <button class="clear-cache-btn" onclick="triggerNewSessionConfirm()" id="txt-reset-btn">جلسة جديدة تماماً (مسح الحفظ)</button>
+    </div>
+</div>
+
+<div id="setup-overlay">
+    <div class="modal-box">
+        <h3 id="setup-modal-title" style="margin-top:0; color:#2d1b07;">تجهيز</h3>
+        <p style="font-size:14px; color:#a69c83;" id="txt-modal-desc">إلى كم القسمة?</p>
+        <input type="number" id="modal-sections-input" min="1" max="10" placeholder="" style="margin-bottom: 20px; text-align:center;">
+        <button class="start-btn" onclick="confirmPageSetup()" id="txt-modal-start">بدء</button>
+    </div>
+</div>
+
+<div id="confirm-overlay">
+    <div class="modal-box" style="border: 2px solid #d9534f;">
+        <h3 style="margin-top:5px; color:#d9534f; font-size:20px;" id="confirm-modal-title">⚠️ Achtung / تنبيه</h3>
+        <p style="font-size:15px; color:#2d1b07; line-height:1.5; margin:15px 0;" id="confirm-modal-msg">Möchtest du wirklich eine neue Sitzung starten?</p>
+        <div class="confirm-btn-container">
+            <button class="confirm-btn-yes" onclick="executeResetSession()" id="confirm-txt-yes">Ja / نعم</button>
+            <button class="confirm-btn-no" onclick="closeConfirmOverlay()" id="confirm-txt-no">Abbrechen / إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<div id="click-overlay">
+    <div class="overlay-top-row">
+        <button class="abort-btn" onclick="closeClickOverlay()" id="txt-abort">إلغاء</button>
+        <div class="overlay-header" id="overlay-txt-page">Thumon X - Section Y</div>
+        <button class="minus-btn" onclick="handleMinusTouch()">−</button>
+    </div>
+    
+    <div class="timer-display-container">
+        <div id="overlay-section-timer" class="overlay-section-timer">00:00</div>
+        <button id="section-pause-btn" class="pause-btn" onclick="toggleSectionPause()">
+            <span id="pause-icon">⏸️</span> <span id="pause-text">Pause</span>
+        </button>
+    </div>
+
+    <button id="giant-btn" class="giant-circle-btn" onclick="handleCircleTouch()">
+        <div class="circle-top-target" id="circle-instruction-txt">احفظ 5 مرات</div>
+        <div id="overlay-counter" class="counter-big">0</div>
+        <div id="circle-section-txt" class="circle-bottom-info">Phase 1</div>
+    </button>
+</div>
+
+<script>
+    const lng = {
+        de: { title: "⏱️ Zeit-Tracker", gTime: "Gesamtzeit", pTime: "Aktueller Thumon", settTitle: "Einstellungen", settPages: "Wie viele Thumon möchtest du lesen?", settSave: "Speichern & Starten", page: "Thumon", clickToSetup: "Klicke hier, um den Thumon aufzuteilen", modalDesc: "In wie viele Abschnitte hast du diesen Thumon untergeteilt?", modalStart: "Start", section: "Abschnitt", startBtnTxt: "Starten ⏱️", done: "Erledigt", reps: "Wiederholungen", abort: "Abbrechen", finished: "🎉 Session beendet!", reportDesc: "Hier ist deine Auswertung:", newSession: "Neue Session starten", save_5: "Memorieren 5x", rec_4: "Rezitieren 4x", corr_3: "Korrigieren 3x", unitMin: "Min.", phase1: "Phase 1", phase2: "Phase 2", phase3: "Finale Phase", locked: "Gesperrt 🔒", shareWa: "Ergebnis teilen", placeholderTxt: "Zahl tippen...", pause: "Pause", resume: "Weiter", resetBtn: "Sitzung zurücksetzen (Löschen)", confirmMsg: "Möchtest du wirklich eine neue Sitzung starten? Alle aktuellen Zeiten werden gelöscht.", confTitle: "Achtung", yes: "Ja, Neustart", no: "Abbrechen" },
+        en: { title: "⏱️ Time Tracker", gTime: "Total Time", pTime: "Current Thumon", settTitle: "Settings", settPages: "How many Thumon to read?", settSave: "Save & Start", page: "Thumon", clickToSetup: "Click here to divide the Thumon into sections", modalDesc: "How many sections in this Thumon?", modalStart: "Start", section: "Section", startBtnTxt: "Start ⏱️", done: "Done", reps: "Repetitions", abort: "Cancel", finished: "🎉 Session Finished!", reportDesc: "Here is your report:", newSession: "Start New Session", save_5: "Memorize 5x", rec_4: "Recite 4x", corr_3: "Correct 3x", unitMin: "min.", phase1: "Phase 1", phase2: "Phase 2", phase3: "Final Phase", locked: "Locked 🔒", shareWa: "Share Result", placeholderTxt: "Type a number...", pause: "Pause", resume: "Resume", resetBtn: "Reset Session (Clear)", confirmMsg: "Are you sure you want to start a new session? All current data will be lost.", confTitle: "Warning", yes: "Yes, Reset", no: "Cancel" },
+        fr: { title: "⏱️ Chronomètre", gTime: "Temps Total", pTime: "Thumon Actuel", settTitle: "Paramètres", settPages: "Combien de Thumon à lire?", settSave: "Enregistrer & Démarrer", page: "Thumon", clickToSetup: "Cliquez ici pour diviser le Thumon en sections", modalDesc: "En combien de sections?", modalStart: "Démarrer", section: "Section", startBtnTxt: "Démarrer ⏱️", done: "Fait", reps: "Répétitions", abort: "Annuler", finished: "🎉 Session Terminée!", reportDesc: "Voici votre rapport:", newSession: "Nouvelle Session", save_5: "Mémoriser 5x", rec_4: "Réciter 4x", corr_3: "Corriger 3x", unitMin: "min.", phase1: "Phase 1", phase2: "Phase 2", phase3: "Phase Finale", locked: "Verrouillé 🔒", shareWa: "Partager le résultat", placeholderTxt: "Taper un nombre...", pause: "Pause", resume: "Reprendre", resetBtn: "Réinitialiser", confirmMsg: "Voulez-vous vraiment commencer une nouvelle session ? Toutes les données actuelles seront perdues.", confTitle: "Attention", yes: "Oui, Relancer", no: "Annuler" },
+        es: { title: "⏱️ Control de Tiempo", gTime: "Tiempo Total", pTime: "Thumon Actual", settTitle: "Ajustes", settPages: "¿Cuántos Thumon vas a leer?", settSave: "Guardar y Comenzar", page: "Thumon", clickToSetup: "Haga clic aquí para dividir el Thumon en secciones", modalDesc: "¿En cuántas secciones?", modalStart: "Comenzar", section: "Sección", startBtnTxt: "Comenzar ⏱️", done: "Hecho", reps: "Repeticiones", abort: "Cancelar", finished: "🎉 ¡Sesión Terminada!", reportDesc: "Aquí está tu informe:", newSession: "Iniciar Nueva Sesión", save_5: "Memorizar 5x", rec_4: "Recitar 4x", corr_3: "Corregir 3x", unitMin: "min.", phase1: "Fase 1", phase2: "Fase 2", phase3: "Fase Final", locked: "Bloqueado 🔒", shareWa: "Compartir Resultado", placeholderTxt: "Escribe un número...", pause: "Pausa", resume: "Continuar", resetBtn: "Reiniciar Sesión", confirmMsg: "¿Está seguro de que desea iniciar una nueva sesión? Se perderán todos los datos actuales.", confTitle: "Atención", yes: "Sí, Reiniciar", no: "Cancelar" },
+        it: { title: "⏱️ Tracker del Tempo", gTime: "Tempo Total", pTime: "Thumon Attuale", settTitle: "Impostazioni", settPages: "Quanti Thumon da leggere?", settSave: "Salva e Inizia", page: "Thumon", clickToSetup: "Clicca qui per dividere il Thumon in sezioni", modalDesc: "In quante sezioni?", modalStart: "Inizia", section: "Sezione", startBtnTxt: "Inizia ⏱️", done: "Fatto", reps: "Ripetizioni", abort: "Annulla", finished: "🎉 Sessione Terminata!", reportDesc: "Ecco il tuo rapporto:", newSession: "Nuova Sessione", save_5: "Memorizza 5x", rec_4: "Recita 4x", corr_3: "Correggi 3x", unitMin: "min.", phase1: "Fase 1", phase2: "Fase 2", phase3: "Fase Finale", locked: "Bloccato 🔒", shareWa: "Condividi Risultato", placeholderTxt: "Digita un numero...", pause: "Pausa", resume: "Riprendi", resetBtn: "Azzera Sessione", confirmMsg: "Sei sicuro di voler iniziare una nuova sessione? Tutti i dati correnti andranno persi.", confTitle: "Attenzione", yes: "Sì, Riavvia", no: "Annulla" },
+        ar: { title: "⏱️ متعقب التوقيت", gTime: "الوقت الكلي", pTime: "الثُّمن الحالي", settTitle: "الإعدادات", settPages: "كم عدد الأثمان التي تود قراءتها؟", settSave: "حفظ وبدء", page: "ثُمن", clickToSetup: "انقر لتقسيم الثُّمن", modalDesc: "إلى كم القسمة قمت بتقسيم هذا الثُّمن؟", modalStart: "بدء", section: "القسمة", startBtnTxt: "ابدأ ⏱️", done: "تم", reps: "التكرارات", abort: "إلغاء", finished: "🎉 انتهت الجلسة!", reportDesc: "إليك تقرير الأداء اليوم:", newSession: "بدء جلسة جديدة", save_5: "احفظ 5 مرات", rec_4: "استظهر 4 مرات", corr_3: "صحح 3 مرات", unitMin: "دقيقة", phase1: "المرحلة الأولى", phase2: "المرحلة الثانية", phase3: "المرحلة الثالثة والأخيرة", locked: "مغلق 🔒", shareWa: "مشاركة النتيجة", placeholderTxt: "اكتب رقماً...", pause: "إيقاف", resume: "استئناف", resetBtn: "جلسة جديدة تماماً (مسح الحفظ)", confirmMsg: "هل أنت متأكد من بدء جلسة جديدة؟ سيتم مسح جميع الأوقات الحالية.", confTitle: "تنبيه هام", yes: "نعم، ابدأ من جديد", no: "إلغاء" }
+    };
+
+    let currentLang = 'ar';
+    let totalPages = 5;       
+    let defaultSections = 3;  
+    let currentPage = 1;
+    let sessionData = {};
+
+    let globalStartTime = null;
+    let globalTimeOffset = 0;
+    let pageStartTime = null;
+    let pageTimeOffset = 0;
+    
+    let sectionStartTime = null; 
+    let sectionTimeOffset = 0;
+    let isSectionPaused = false;
+
+    let globalInterval = null;
+    let isTimerRunning = false;
+    let isSessionStarted = false;
+
+    let activeSectionNum = null;
+    let currentTargetClicks = 5;
+    let currentClicks = 0;
+
+    let wakeLockObj = null;
+
+    window.onload = function() {
+        currentLang = localStorage.getItem('tt_lang') || 'ar';
+        document.getElementById('lang-select').value = currentLang;
+
+        let savedPages = localStorage.getItem('tt_pages');
+        if (savedPages) {
+            totalPages = parseInt(savedPages);
+            document.getElementById('input-pages').value = totalPages;
+        }
+
+        let savedSections = localStorage.getItem('tt_sections');
+        if (savedSections) {
+            defaultSections = parseInt(savedSections);
+            document.getElementById('modal-sections-input').value = defaultSections;
+        }
+
+        changeLanguage(currentLang); 
+        
+        if (localStorage.getItem('tt_session_active_data')) {
+            loadSessionProgress();
+        } else {
+            initSessionStructure();
+        }
+        
+        setupFakeVideoWakeLock();
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && isSessionStarted) {
+                requestNativeWakeLock();
+                activateWakeLockVideo();
+            }
+        });
+    };
+
+    async function requestNativeWakeLock() {
+        if ('wakeLock' in navigator) {
+            try {
+                wakeLockObj = await navigator.wakeLock.request('screen');
+            } catch (err) {
+                console.log("Native Wake Lock fehlgeschlagen.");
+            }
+        }
+    }
+
+    function releaseNativeWakeLock() {
+        if (wakeLockObj !== null) {
+            wakeLockObj.release();
+            wakeLockObj = null;
+        }
+    }
+
+    function initSessionStructure() {
+        sessionData = {};
+        for(let p = 1; p <= totalPages; p++) {
+            sessionData[p] = { sectionsCount: null, doneSections: {}, elapsedTime: 0, isSetup: false, isCompleted: false };
+        }
+        currentPage = 1;
+        isSessionStarted = false;
+        globalTimeOffset = 0;
+        pageTimeOffset = 0;
+        clearInterval(globalInterval);
+        deactivateWakeLockVideo();
+        releaseNativeWakeLock();
+        
+        document.getElementById('global-timer').innerText = "00:00";
+        document.getElementById('page-timer').innerText = "00:00";
+        document.getElementById('final-global-timer-big').innerText = "00:00";
+        
+        document.getElementById('normal-dashboard').style.display = 'flex';
+        document.getElementById('final-dashboard').style.display = 'none';
+        
+        document.getElementById('session-area').style.display = 'flex';
+        document.getElementById('session-area').style.flexDirection = 'column';
+        document.getElementById('final-screen').style.display = 'none';
+        
+        saveSessionProgress(); 
+        renderTabsAndActiveContent();
+    }
+
+    function saveSessionProgress() {
+        localStorage.setItem('tt_session_active_data', JSON.stringify(sessionData));
+        localStorage.setItem('tt_current_page', currentPage);
+        localStorage.setItem('tt_is_started', isSessionStarted);
+        localStorage.setItem('tt_global_offset', globalTimeOffset);
+        localStorage.setItem('tt_page_offset', pageTimeOffset);
+    }
+
+    function loadSessionProgress() {
+        sessionData = JSON.parse(localStorage.getItem('tt_session_active_data'));
+        currentPage = parseInt(localStorage.getItem('tt_current_page')) || 1;
+        isSessionStarted = (localStorage.getItem('tt_is_started') === 'true');
+        globalTimeOffset = parseInt(localStorage.getItem('tt_global_offset')) || 0;
+        pageTimeOffset = parseInt(localStorage.getItem('tt_page_offset')) || 0;
+
+        document.getElementById('global-timer').innerText = formatTime(globalTimeOffset);
+        document.getElementById('page-timer').innerText = formatTime(pageTimeOffset);
+        document.getElementById('final-global-timer-big').innerText = formatTime(globalTimeOffset);
+
+        if (isSessionStarted) {
+            globalStartTime = Date.now();
+            pageStartTime = Date.now();
+            globalInterval = setInterval(updateTimers, 1000);
+            requestNativeWakeLock();
+            activateWakeLockVideo();
+        }
+
+        let finalCheck = true;
+        for (let p in sessionData) {
+            if (!sessionData[p].isCompleted) finalCheck = false;
+        }
+        if (finalCheck && isSessionStarted) {
+            endEntireSession();
+        } else {
+            renderTabsAndActiveContent();
+        }
+    }
+
+    /* Öffnet das neue, formschöne Bestätigungs-Overlay */
+    function triggerNewSessionConfirm() {
+        document.getElementById('confirm-modal-title').innerText = lng[currentLang].confTitle;
+        document.getElementById('confirm-modal-msg').innerText = lng[currentLang].confirmMsg;
+        document.getElementById('confirm-txt-yes').innerText = lng[currentLang].yes;
+        document.getElementById('confirm-txt-no').innerText = lng[currentLang].no;
+        document.getElementById('confirm-overlay').style.display = 'flex';
+    }
+
+    function closeConfirmOverlay() {
+        document.getElementById('confirm-overlay').style.display = 'none';
+    }
+
+    function executeResetSession() {
+        closeConfirmOverlay();
+        resetEntireSession();
+    }
+
+    function resetEntireSession() {
+        localStorage.removeItem('tt_session_active_data');
+        localStorage.removeItem('tt_current_page');
+        localStorage.removeItem('tt_is_started');
+        localStorage.removeItem('tt_global_offset');
+        localStorage.removeItem('tt_page_offset');
+        document.getElementById('settings-overlay').style.display = 'none';
+        initSessionStructure();
+    }
+
+    function setupFakeVideoWakeLock() {
+        const video = document.getElementById('video-wake-lock');
+        video.src = "data:video/mp4;base64,AAAAHGZ0eXBtcDQyAAAAAG1wStandardmI2AAAAAGZyZWUAAAAsbWRhdA==;";
+    }
+
+    function activateWakeLockVideo() {
+        const video = document.getElementById('video-wake-lock');
+        if (video) video.play().catch(e => console.log("WakeLock Video blockiert."));
+    }
+
+    function deactivateWakeLockVideo() {
+        const video = document.getElementById('video-wake-lock');
+        if (video) video.pause();
+    }
+
+    function changeLanguage(langKey) {
+        currentLang = langKey;
+        localStorage.setItem('tt_lang', langKey); 
+        document.body.className = (langKey === 'ar') ? "rtl" : "ltr";
+        
+        document.getElementById('txt-title').innerText = lng[langKey].title;
+        document.getElementById('txt-global-time').innerText = lng[langKey].gTime;
+        document.getElementById('txt-final-global-title').innerText = lng[langKey].gTime;
+        document.getElementById('txt-page-time').innerText = lng[langKey].pTime;
+        document.getElementById('txt-sett-title').innerText = lng[langKey].settTitle;
+        document.getElementById('txt-sett-pages-label').innerText = lng[langKey].settPages;
+        document.getElementById('txt-sett-save').innerText = lng[langKey].settSave;
+        document.getElementById('txt-modal-desc').innerText = lng[langKey].modalDesc;
+        document.getElementById('txt-modal-start').innerText = lng[langKey].modalStart;
+        document.getElementById('txt-abort').innerText = lng[langKey].abort;
+        document.getElementById('txt-finished').innerText = lng[langKey].finished;
+        document.getElementById('txt-report-desc').innerText = lng[langKey].reportDesc;
+        document.getElementById('txt-new-session').innerText = lng[langKey].newSession;
+        document.getElementById('txt-share-wa').innerText = lng[langKey].shareWa;
+        document.getElementById('txt-reset-btn').innerText = lng[langKey].resetBtn;
+        
+        document.getElementById('input-pages').placeholder = lng[langKey].placeholderTxt;
+        document.getElementById('modal-sections-input').placeholder = lng[langKey].placeholderTxt;
+        
+        updatePauseButtonText();
+
+        if (isSessionStarted && document.getElementById('final-screen').style.display === 'block') {
+            endEntireSession(); 
+        } else {
+            renderTabsAndActiveContent();
+        }
+    }
+
+    function updatePauseButtonText() {
+        const pTxt = document.getElementById('pause-text');
+        if(pTxt) {
+            pTxt.innerText = isSectionPaused ? lng[currentLang].resume : lng[currentLang].pause;
+        }
+    }
+
+    // Settings-Anzeige
+    function openSettings() {
+        document.getElementById('input-pages').value = totalPages;
+        document.getElementById('settings-overlay').style.display = 'flex';
+    }
+
+    function cancelSettings() {
+        document.getElementById('settings-overlay').style.display = 'none';
+    }
+
+    function closeSettings() {
+        let inputVal = document.getElementById('input-pages').value;
+        
+        if (inputVal.trim() !== "") {
+            totalPages = parseInt(inputVal) || 5;
+            localStorage.setItem('tt_pages', totalPages);
+        } else {
+            totalPages = 5;
+        }
+
+        document.getElementById('settings-overlay').style.display = 'none';
+        resetEntireSession(); 
+    }
+
+    function renderTabsAndActiveContent() {
+        const tabsContainer = document.getElementById('tabs-container');
+        const contentBox = document.getElementById('active-tab-content');
+        
+        tabsContainer.innerHTML = '';
+        contentBox.innerHTML = '';
+
+        if(currentPage > totalPages) return;
+
+        for (let p = 1; p <= totalPages; p++) {
+            const tab = document.createElement('div');
+            tab.className = 'tab-item';
+            
+            if (p < currentPage) {
+                tab.classList.add('completed-tab');
+                tab.innerText = `📖 ${lng[currentLang].page} ${p} ✓`;
+            } else if (p === currentPage) {
+                tab.classList.add('active-tab');
+                tab.innerText = `📖 ${lng[currentLang].page} ${p}`;
+            } else {
+                tab.classList.add('locked-tab');
+                tab.innerText = `📖 ${lng[currentLang].page} ${p} 🔒`;
+            }
+            tabsContainer.appendChild(tab);
+        }
+
+        setTimeout(() => {
+            const activeTabEl = tabsContainer.querySelector('.active-tab');
+            if (activeTabEl) {
+                tabsContainer.scrollLeft = activeTabEl.offsetLeft - (tabsContainer.offsetWidth / 2) + (activeTabEl.offsetWidth / 2);
+            }
+        }, 100);
+
+        let pData = sessionData[currentPage];
+
+        if (!pData || !pData.isSetup) {
+            let buttonText = lng[currentLang].clickToSetup;
+            contentBox.innerHTML = `
+                <div class="page-title-setup">
+                    <span>${lng[currentLang].page} ${currentPage} 📖</span>
+                    <button class="light-setup-btn placeholder-style pulse-attention" onclick="triggerPageSetup()">${buttonText}</button>
+                </div>
+            `;
+        } else {
+            contentBox.innerHTML = `
+                <div class="page-title-centered">
+                    ${lng[currentLang].page} ${currentPage}
+                </div>
+                <div class="sections-list"></div>
+            `;
+            
+            const list = contentBox.querySelector('.sections-list');
+            for (let s = 1; s <= pData.sectionsCount; s++) {
+                const sRow = document.createElement('div');
+                sRow.className = 'section-item';
+                
+                let isDone = pData.doneSections[s];
+                let isCurrentAccessible = (s === 1 || pData.doneSections[s-1]);
+
+                if (isDone) {
+                    sRow.classList.add('done');
+                    sRow.innerHTML = `<span>${lng[currentLang].section} ${s}</span> <span>${lng[currentLang].done} ✓</span>`;
+                } else if (isCurrentAccessible) {
+                    sRow.innerHTML = `
+                        <span>${lng[currentLang].section} ${s}</span> 
+                        <button class="light-setup-btn pulse-attention" onclick="startSectionReading(${s})">${lng[currentLang].startBtnTxt}</button>
+                    `;
+                } else {
+                    sRow.classList.add('locked');
+                    sRow.innerHTML = `<span>${lng[currentLang].section} ${s} 🔒</span> <span></span>`;
+                }
+                list.appendChild(sRow);
+            }
+        }
+    }
+
+    function triggerPageSetup() {
+        document.getElementById('setup-modal-title').innerText = `${lng[currentLang].page} ${currentPage}`;
+        document.getElementById('setup-overlay').style.display = 'flex';
+    }
+
+    function confirmPageSetup() {
+        let inputVal = document.getElementById('modal-sections-input').value;
+        let sc = 3; 
+
+        if (inputVal.trim() !== "") {
+            sc = parseInt(inputVal) || 3;
+            defaultSections = sc;
+            localStorage.setItem('tt_sections', sc);
+        } else {
+            sc = defaultSections;
+        }
+        
+        sessionData[currentPage].sectionsCount = sc;
+        sessionData[currentPage].isSetup = true;
+        for(let s = 1; s <= sc; s++) sessionData[currentPage].doneSections[s] = false;
+
+        document.getElementById('setup-overlay').style.display = 'none';
+
+        if (!isSessionStarted) {
+            globalStartTime = Date.now();
+            globalInterval = setInterval(updateTimers, 1000);
+            isSessionStarted = true;
+            requestNativeWakeLock();
+            activateWakeLockVideo(); 
+        } else {
+            globalStartTime = Date.now();
+        }
+        
+        pageStartTime = Date.now();
+        pageTimeOffset = 0;
+        
+        saveSessionProgress(); 
+        renderTabsAndActiveContent();
+    }
+
+    function startSectionReading(sNum) {
+        activeSectionNum = sNum;
+        currentTargetClicks = 5;
+        currentClicks = 0;
+        
+        pageStartTime = Date.now();
+        globalStartTime = Date.now();
+        sectionStartTime = Date.now(); 
+        sectionTimeOffset = 0;
+        
+        isSectionPaused = false;
+        isTimerRunning = true;
+
+        const pBtn = document.getElementById('section-pause-btn');
+        document.getElementById('pause-icon').innerText = "⏸️";
+        pBtn.classList.remove('paused');
+        document.getElementById('giant-btn').classList.remove('disabled-state');
+
+        updateClickOverlayUI();
+        updatePauseButtonText();
+        document.getElementById('click-overlay').style.display = 'flex';
+        
+        requestNativeWakeLock();
+        activateWakeLockVideo(); 
+    }
+
+    function toggleSectionPause() {
+        triggerVibrationOnly();
+        const pBtn = document.getElementById('section-pause-btn');
+        const gBtn = document.getElementById('giant-btn');
+        const pIcon = document.getElementById('pause-icon');
+
+        if (!isSectionPaused) {
+            isSectionPaused = true;
+            isTimerRunning = false;
+            
+            sectionTimeOffset += (Date.now() - sectionStartTime);
+            pageTimeOffset += (Date.now() - pageStartTime);
+            globalTimeOffset += (Date.now() - globalStartTime);
+
+            pIcon.innerText = "▶️";
+            pBtn.classList.add('paused');
+            gBtn.classList.add('disabled-state'); 
+            releaseNativeWakeLock();
+            deactivateWakeLockVideo();
+        } else {
+            isSectionPaused = false;
+            isTimerRunning = true;
+            
+            sectionStartTime = Date.now();
+            pageStartTime = Date.now();
+            globalStartTime = Date.now();
+
+            pIcon.innerText = "⏸️";
+            pBtn.classList.remove('paused');
+            gBtn.classList.remove('disabled-state');
+            requestNativeWakeLock();
+            activateWakeLockVideo();
+        }
+        
+        saveSessionProgress(); 
+        updatePauseButtonText();
+    }
+
+    function updateClickOverlayUI() {
+        let pageWord = lng[currentLang].page;
+        let secWord = lng[currentLang].section;
+        document.getElementById('overlay-txt-page').innerText = `${pageWord} ${currentPage} - ${secWord} ${activeSectionNum}`;
+        document.getElementById('overlay-counter').innerText = `${currentClicks}`;
+        
+        const instructionTxt = document.getElementById('circle-instruction-txt');
+        const bottomInfoTxt = document.getElementById('circle-section-txt');
+        const btn = document.getElementById('giant-btn');
+        
+        let isCurrentlyDisabled = isSectionPaused ? ' disabled-state' : '';
+        btn.className = 'giant-circle-btn' + isCurrentlyDisabled; 
+
+        if (currentTargetClicks === 5) {
+            btn.classList.add('circle-round-5');
+            instructionTxt.innerText = lng[currentLang].save_5; 
+            bottomInfoTxt.innerText = lng[currentLang].phase1;
+        } else if (currentTargetClicks === 4) {
+            btn.classList.add('circle-round-4');
+            instructionTxt.innerText = lng[currentLang].rec_4; 
+            bottomInfoTxt.innerText = lng[currentLang].phase2;
+        } else if (currentTargetClicks === 3) {
+            btn.classList.add('circle-round-3');
+            instructionTxt.innerText = lng[currentLang].corr_3; 
+            bottomInfoTxt.innerText = lng[currentLang].phase3;
+        }
+    }
+
+    function handleCircleTouch() {
+        if (isSectionPaused) return; 
+
+        activateWakeLockVideo();
+
+        currentClicks++;
+        if (currentClicks < currentTargetClicks) {
+            document.getElementById('overlay-counter').innerText = `${currentClicks}`;
+            triggerVibrationOnly(); 
+        } else {
+            if (currentTargetClicks === 5) {
+                currentTargetClicks = 4; currentClicks = 0;
+                playGongAndVibrate(); 
+                updateClickOverlayUI();
+            } else if (currentTargetClicks === 4) {
+                currentTargetClicks = 3; currentClicks = 0;
+                playGongAndVibrate(); 
+                updateClickOverlayUI();
+            } else if (currentTargetClicks === 3) {
+                playGongAndVibrate();
+                sessionData[currentPage].doneSections[activeSectionNum] = true;
+                isTimerRunning = false;
+                
+                pageTimeOffset += (Date.now() - pageStartTime);
+                globalTimeOffset += (Date.now() - globalStartTime);
+                
+                document.getElementById('click-overlay').style.display = 'none';
+                
+                saveSessionProgress(); 
+                checkPageCompletion();
+            }
+        }
+    }
+
+    function handleMinusTouch() {
+        if (isSectionPaused) return; 
+        triggerVibrationOnly(); 
+        activateWakeLockVideo();
+        
+        if (currentClicks > 0) {
+            currentClicks--;
+            document.getElementById('overlay-counter').innerText = `${currentClicks}`;
+        } else {
+            if (currentTargetClicks === 4) {
+                currentTargetClicks = 5;
+                currentClicks = 4; 
+                updateClickOverlayUI();
+            } else if (currentTargetClicks === 3) {
+                currentTargetClicks = 4;
+                currentClicks = 3;
+                updateClickOverlayUI();
+            }
+        }
+    }
+
+    function checkPageCompletion() {
+        let pData = sessionData[currentPage];
+        let allDone = true;
+        for(let s = 1; s <= pData.sectionsCount; s++) {
+            if(!pData.doneSections[s]) { allDone = false; break; }
+        }
+        if(allDone) {
+            pData.elapsedTime = pageTimeOffset;
+            pData.isCompleted = true;
+            if(currentPage < totalPages) {
+                currentPage++; 
+                pageTimeOffset = 0;
+                document.getElementById('page-timer').innerText = "00:00";
+                saveSessionProgress(); 
+                renderTabsAndActiveContent();
+            } else {
+                endEntireSession();
+            }
+        } else {
+            renderTabsAndActiveContent();
+        }
+    }
+
+    function closeClickOverlay() {
+        if(isTimerRunning) {
+            pageTimeOffset += (Date.now() - pageStartTime);
+            globalTimeOffset += (Date.now() - globalStartTime);
+            isTimerRunning = false;
+        }
+        document.getElementById('click-overlay').style.display = 'none';
+        saveSessionProgress(); 
+        renderTabsAndActiveContent();
+    }
+
+    function updateTimers() {
+        if (!isTimerRunning) return;
+        
+        let now = Date.now();
+        
+        let diffGlobal = now - globalStartTime + globalTimeOffset;
+        let formattedGlobal = formatTime(diffGlobal);
+        document.getElementById('global-timer').innerText = formattedGlobal;
+        document.getElementById('final-global-timer-big').innerText = formattedGlobal;
+        
+        let diffPage = now - pageStartTime + pageTimeOffset;
+        document.getElementById('page-timer').innerText = formatTime(diffPage);
+        
+        if (document.getElementById('click-overlay').style.display === 'flex') {
+            let diffSection = now - sectionStartTime + sectionTimeOffset;
+            document.getElementById('overlay-section-timer').innerText = formatTime(diffSection);
+        }
+    }
+
+    function endEntireSession() {
+        clearInterval(globalInterval);
+        deactivateWakeLockVideo(); 
+        releaseNativeWakeLock();
+        
+        // Dashboards umschalten
+        document.getElementById('normal-dashboard').style.display = 'none';
+        document.getElementById('final-dashboard').style.display = 'block';
+        
+        let totalComputedMs = 0;
+        for (let p = 1; p <= totalPages; p++) {
+            totalComputedMs += sessionData[p].elapsedTime;
+        }
+        if (totalComputedMs > 0) {
+            document.getElementById('final-global-timer-big').innerText = formatTime(totalComputedMs);
+        }
+
+        document.getElementById('session-area').style.display = 'none';
+        document.getElementById('final-screen').style.display = 'block';
+        
+        const reportList = document.getElementById('page-reports-list');
+        reportList.innerHTML = '';
+        
+        for(let p = 1; p <= totalPages; p++) {
+            const item = document.createElement('div');
+            item.className = 'page-report-item';
+            
+            item.innerHTML = `
+                <span>📖 ${lng[currentLang].page} ${p}</span> 
+                <strong>${formatTime(sessionData[p].elapsedTime)} ${lng[currentLang].unitMin}</strong>
+            `;
+            reportList.appendChild(item);
+        }
+    }
+
+    function shareToWhatsApp() {
+        let totalTimeText = document.getElementById('final-global-timer-big').innerText;
+        
+        let text = `🏆 *Time Tracker Report* 🏆\n\n`;
+        text += `⏱️ *Total Time:* ${totalTimeText}\n`;
+        text += `────────────────────\n`;
+        
+        for (let p = 1; p <= totalPages; p++) {
+            let timeStr = formatTime(sessionData[p].elapsedTime);
+            text += `📖 ${lng[currentLang].page} ${p}: ${timeStr} ${lng[currentLang].unitMin}\n`;
+        }
+        
+        text += `\n🎯 Done successfully! / تم بحمد الله`;
+        
+        let url = "https://api.whatsapp.com/send?text=" + encodeURIComponent(text);
+        window.open(url, '_blank');
+    }
+
+    function formatTime(ms) {
+        if(ms < 0) ms = 0;
+        let totalSeconds = Math.floor(ms / 1000);
+        let hours = Math.floor(totalSeconds / 3600);
+        let minutes = Math.floor((totalSeconds % 3600) / 60);
+        let seconds = totalSeconds % 60;
+        
+        let mm = (minutes < 10 ? "0" : "") + minutes;
+        let ss = (seconds < 10 ? "0" : "") + seconds;
+        
+        if (hours > 0) {
+            let hh = (hours < 10 ? "0" : "") + hours;
+            return hh + ":" + mm + ":" + ss;
+        } else {
+            return mm + ":" + ss;
+        }
+    }
+
+    function triggerVibrationOnly() {
+        if (navigator.vibrate) navigator.vibrate(60); 
+    }
+
+    function playGongAndVibrate() {
+        if (navigator.vibrate) navigator.vibrate(150); 
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) {
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine'; 
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime); 
+                gain.gain.setValueAtTime(0.4, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+                osc.connect(gain); gain.connect(ctx.destination);
+                osc.start(); osc.stop(ctx.currentTime + 0.8);
+            }
+        } catch (e) { console.log("Audio API blockiert."); }
+    }
+</script>
+
+</body>
+</html>
