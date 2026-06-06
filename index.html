@@ -1,1312 +1,984 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Time Tracker Elegant</title>
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Time Tracker">
-    
-    <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%239e6b26'><rect width='512' height='512' rx='120' fill='%232d1b07'/><circle cx='256' cy='280' r='140' fill='none' stroke='%23fdfbf7' stroke-width='24'/><path d='M256 140v140h100' fill='none' stroke='%239e6b26' stroke-width='20' stroke-linecap='round'/><circle cx='256' cy='280' r='16' fill='%239e6b26'/><path d='M220 60h72M256 60v40' fill='none' stroke='%23fdfbf7' stroke-width='24' stroke-linecap='round'/><path d='M370 100l30 30' fill='none' stroke='%23fdfbf7' stroke-width='20' stroke-linecap='round'/></svg>">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%239e6b26'><rect width='512' height='512' rx='120' fill='%232d1b07'/><circle cx='256' cy='280' r='140' fill='none' stroke='%23fdfbf7' stroke-width='24'/><path d='M256 140v140h100' fill='none' stroke='%239e6b26' stroke-width='20' stroke-linecap='round'/><circle cx='256' cy='280' r='16' fill='%239e6b26'/><path d='M220 60h72M256 60v40' fill='none' stroke='%23fdfbf7' stroke-width='24' stroke-linecap='round'/><path d='M370 100l30 30' fill='none' stroke='%23fdfbf7' stroke-width='20' stroke-linecap='round'/></svg>">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Reading Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cormorant+Garamond:wght@300;600&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
 
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            text-align: center;
-            background-color: #f4ebd9; 
-            color: #2d1b07; 
-            padding: 15px;
-            margin: 0;
-            transition: direction 0.3s ease;
-        }
-        
-        body.rtl { direction: rtl; }
-        body.ltr { direction: ltr; }
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Lese-Tracker" />
+  <meta name="theme-color" content="#a06820" />
+  <script>
+  (function setupPWA() {
+    function makeIconBlob(cb) {
+      var c = document.createElement('canvas');
+      c.width = c.height = 192;
+      var ctx = c.getContext('2d');
+      ctx.fillStyle = '#faf5ec';
+      ctx.beginPath();
+      ctx.roundRect(0, 0, 192, 192, 36);
+      ctx.fill();
+      ctx.strokeStyle = '#a06820';
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.roundRect(4, 4, 184, 184, 32);
+      ctx.stroke();
+      ctx.font = '110px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('📖', 96, 100);
+      c.toBlob(cb, 'image/png');
+    }
+    function injectManifest(iconUrl) {
+      var manifest = {
+        name: 'Reading Tracker',
+        short_name: 'Lese-Tracker',
+        start_url: location.href.split('?')[0],
+        display: 'standalone',
+        orientation: 'portrait',
+        background_color: '#f0e8d8',
+        theme_color: '#a06820',
+        icons: [
+          { src: iconUrl, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+          { src: iconUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+        ]
+      };
+      var blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+      var url  = URL.createObjectURL(blob);
+      var link = document.createElement('link');
+      link.rel  = 'manifest';
+      link.href = url;
+      document.head.appendChild(link);
+      var apple = document.createElement('link');
+      apple.rel  = 'apple-touch-icon';
+      apple.href = iconUrl;
+      document.head.appendChild(apple);
+    }
+    function registerSW() {
+      if (!('serviceWorker' in navigator)) return;
+      var swCode = [
+        "var CACHE='rt-v1';",
+        "self.addEventListener('install',function(e){",
+        "  e.waitUntil(caches.open(CACHE).then(function(c){",
+        "    return c.addAll([location.href]);",
+        "  }).then(function(){ return self.skipWaiting(); }));",
+        "});",
+        "self.addEventListener('activate',function(e){",
+        "  e.waitUntil(clients.claim());",
+        "});",
+        "self.addEventListener('fetch',function(e){",
+        "  e.respondWith(caches.match(e.request).then(function(r){",
+        "    return r || fetch(e.request);",
+        "  }));",
+        "});"
+      ].join('\n');
+      var blob  = new Blob([swCode], { type: 'application/javascript' });
+      var swUrl = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(swUrl).catch(function(e){ console.warn('SW:', e); });
+    }
+    makeIconBlob(function(blob) {
+      var iconUrl = URL.createObjectURL(blob);
+      injectManifest(iconUrl);
+    });
+    registerSW();
+  })();
+  </script>
 
-        .container {
-            max-width: 500px;
-            margin: auto;
-            background: #fdfbf7; 
-            padding: 25px 20px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(45, 27, 7, 0.08);
-            border: 1px solid #e6dcbf;
-            position: relative;
-        }
-        
-        .settings-icon {
-            position: absolute;
-            top: 22px;
-            font-size: 22px;
-            cursor: pointer;
-            background: #f6f0e3;
-            border: 1px solid #e6dcbf;
-            padding: 5px 8px;
-            border-radius: 8px;
-            z-index: 10;
-            color: #9e6b26;
-            transition: background 0.2s;
-        }
-        .settings-icon:active { background: #e6dcbf; }
-        body.rtl .settings-icon { left: auto; right: 20px; }
-        body.ltr .settings-icon { right: auto; left: 20px; }
+  <style>
+    :root {
+      --bg:     #f0e8d8;
+      --card:   #faf5ec;
+      --warm:   #a06820;
+      --warm-d: #c8913a;
+      --ink:    #2a1f10;
+      --muted:  #8a6a40;
+      --muted-l:#b89060;
+      --border: rgba(160,104,32,0.2);
+      --stat:   #f4ede0;
+      --serif:  'Cormorant Garamond', Georgia, serif;
+      --num:    'Inter', system-ui, -apple-system, sans-serif;
+      --ui:     'Amiri', serif;
+    }
+    html[dir="ltr"] { --ui: 'Inter', system-ui, -apple-system, sans-serif; }
 
-        h1 { color: #2d1b07; margin-top: 0; margin-bottom: 20px; font-size: 24px; font-weight: 700; }
-        
-        .dashboard {
-            background: #f6f0e3;
-            border: 1px solid #e6dcbf;
-            padding: 15px;
-            border-radius: 12px;
-            margin: 20px 0;
-            display: flex;
-            justify-content: space-around;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        .time-val { color: #9e6b26; font-size: 20px; display:block; margin-top: 4px; font-weight: 800; letter-spacing: 0.5px; font-variant-numeric: tabular-nums; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* Große Gesamtzeitanzeige für das Finale */
-        .final-dashboard-headline {
-            background: #f6f0e3;
-            border: 1px solid #e6dcbf;
-            padding: 20px 15px;
-            border-radius: 12px;
-            margin: 20px 0;
-            text-align: center;
-            font-weight: bold;
-            font-size: 16px;
-        }
-        .final-time-big {
-            color: #9e6b26;
-            font-size: 38px;
-            display: block;
-            margin-top: 8px;
-            font-weight: 900;
-            letter-spacing: 1px;
-            font-variant-numeric: tabular-nums;
-        }
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      background-image:
+        radial-gradient(ellipse 80% 60% at 85% 85%, rgba(160,104,32,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 40% at 15% 10%, rgba(160,104,32,0.06) 0%, transparent 60%);
+      display: flex; align-items: center; justify-content: center;
+      padding: 2rem 1rem; font-family: var(--ui);
+    }
 
-        #settings-overlay, #setup-overlay, #confirm-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(45, 27, 7, 0.5);
-            z-index: 6000;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .modal-box {
-            background: #fdfbf7;
-            padding: 25px;
-            border-radius: 15px;
-            width: 100%;
-            max-width: 360px;
-            text-align: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-            border: 1px solid #e6dcbf;
-            position: relative;
-        }
+    body::before {
+      content:''; position:fixed; inset:-50%; width:200%; height:200%;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23g)' opacity='0.03'/%3E%3C/svg%3E");
+      animation:grain 8s steps(10) infinite; pointer-events:none; z-index:0;
+    }
 
-        .modal-close-btn {
-            position: absolute;
-            top: 15px;
-            font-size: 14px;
-            font-weight: bold;
-            background: #f6f0e3;
-            border: 1px solid #e6dcbf;
-            padding: 5px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            color: #70583d;
-            transition: background 0.2s;
-        }
-        .modal-close-btn:active { background: #e6dcbf; }
-        body.rtl .modal-close-btn { left: 15px; }
-        body.ltr .modal-close-btn { right: 15px; }
+    .ornament-rule { margin:0.6rem 0 0.75rem; width:100%; }
+    .ornament-rule svg { width:100%; height:18px; display:block; }
+    @keyframes grain {
+      0%,100%{transform:translate(0,0)} 10%{transform:translate(-2%,-3%)} 20%{transform:translate(3%,1%)}
+      30%{transform:translate(-1%,4%)} 40%{transform:translate(4%,-1%)} 50%{transform:translate(-3%,2%)}
+      60%{transform:translate(2%,3%)} 70%{transform:translate(-4%,0%)} 80%{transform:translate(1%,-4%)} 90%{transform:translate(3%,-2%)}
+    }
 
-        .setup-group {
-            background: #f6f0e3;
-            border: 1px solid #e6dcbf;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-        body.rtl .setup-group { text-align: right; }
-        body.ltr .setup-group { text-align: left; }
-        
-        .setup-group label { display: block; font-size: 13px; font-weight: bold; margin-bottom: 6px; color: #2d1b07; }
-        
-        input[type="number"], select {
-            width: 100%;
-            padding: 10px;
-            font-size: 15px;
-            border: 1px solid #e6dcbf;
-            border-radius: 6px;
-            box-sizing: border-box;
-            background: #fdfbf7;
-            color: #2d1b07;
-        }
+    .card {
+      position:relative; z-index:1; width:100%; max-width:420px;
+      background:var(--card); border:1px solid var(--border); border-radius:16px;
+      padding:1.25rem 1.25rem 1.25rem;
+      box-shadow:0 0 0 1px rgba(160,104,32,0.08), 0 20px 50px rgba(42,31,16,0.12),
+                 0 4px 12px rgba(42,31,16,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
+      animation:rise 0.7s cubic-bezier(0.22,1,0.36,1) both;
+    }
+    @keyframes rise { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+    .card::before {
+      content:''; position:absolute;
+      inset-inline-start:0; top:10%; bottom:10%; width:2px;
+      background:linear-gradient(180deg,transparent,var(--warm-d) 30%,var(--warm-d) 70%,transparent);
+      border-radius:99px; opacity:0.6;
+    }
 
-        input[type="number"]::placeholder {
-            color: #b0a48a;
-            opacity: 0.75;
-            font-size: 14px;
-        }
+    .top-bar { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.75rem; gap:0.75rem; }
+    .settings-btn {
+      display:flex; align-items:center; gap:0.35rem;
+      background:var(--stat); border:1px solid var(--border); border-radius:10px;
+      color:var(--muted); cursor:pointer; font-family:var(--ui); font-size:0.78rem;
+      padding:0.45rem 0.75rem; transition:all 0.2s; white-space:nowrap;
+    }
+    .settings-btn .s-icon { font-size:0.9rem; transition:transform 0.3s; display:inline-block; }
+    .settings-btn:hover { color:var(--warm); border-color:rgba(160,104,32,0.4); background:rgba(160,104,32,0.06); }
+    .settings-btn:hover .s-icon { transform:rotate(45deg); }
+    .settings-btn.active { color:var(--warm); border-color:rgba(160,104,32,0.5); background:rgba(160,104,32,0.08); }
+    .settings-btn.active .s-icon { transform:rotate(90deg); }
+    .share-btn {
+      display:flex; align-items:center; gap:0.35rem;
+      background:var(--warm); border:none; border-radius:10px;
+      color:#faf5ec; cursor:pointer; font-family:var(--ui); font-size:0.78rem;
+      padding:0.45rem 0.75rem; transition:all 0.2s; white-space:nowrap;
+    }
+    .share-btn:hover { background:#8a5818; }
+    .share-btn-full { width:100%; justify-content:center; margin-top:0.75rem; border-radius:10px; font-size:0.82rem; }
 
-        button.start-btn {
-            background: #9e6b26;
-            color: #fdfbf7;
-            border: none;
-            width: 100%;
-            padding: 14px;
-            font-size: 17px;
-            font-weight: bold;
-            border-radius: 10px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(158, 107, 3, 0.2);
-            transition: opacity 0.2s;
-        }
-        button.start-btn:active { opacity: 0.9; }
+    .eyebrow { font-family:var(--ui); font-size:0.85rem; color:var(--warm); margin-bottom:0.5rem; opacity:0.8; }
+    .title   { font-family:var(--ui); font-size:1.7rem; font-weight:700; color:var(--ink); line-height:1.2; text-align:end; flex:1; }
+    .title em { font-style:italic; color:var(--warm); font-weight:400; }
+    html[dir="ltr"] .title { font-family:var(--serif); }
 
-        /* Stil für die Tasten im Bestätigungs-Overlay */
-        .confirm-btn-container {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .confirm-btn-yes {
-            background: #d9534f;
-            color: white;
-            border: none;
-            padding: 12px;
-            font-weight: bold;
-            border-radius: 8px;
-            flex: 1;
-            cursor: pointer;
-            font-size: 15px;
-        }
-        .confirm-btn-no {
-            background: #f6f0e3;
-            color: #2d1b07;
-            border: 1px solid #e6dcbf;
-            padding: 12px;
-            font-weight: bold;
-            border-radius: 8px;
-            flex: 1;
-            cursor: pointer;
-            font-size: 15px;
-        }
-        .confirm-btn-yes:active, .confirm-btn-no:active { opacity: 0.85; }
+    .toast {
+      position:fixed; bottom:2rem; left:50%; transform:translateX(-50%) translateY(10px);
+      background:var(--ink); color:#faf5ec; font-family:var(--ui); font-size:0.82rem;
+      padding:0.65rem 1.2rem; border-radius:10px; opacity:0; pointer-events:none;
+      transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1); white-space:nowrap; z-index:999;
+    }
+    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
-        @keyframes strong-pulse {
-            0% { transform: scale(1); box-shadow: 0 4px 10px rgba(158, 107, 3, 0.15); }
-            50% { transform: scale(1.04); box-shadow: 0 8px 25px rgba(158, 107, 3, 0.45); }
-            100% { transform: scale(1); box-shadow: 0 4px 10px rgba(158, 107, 3, 0.15); }
-        }
+    .settings-overlay {
+      position:fixed; inset:0; z-index:200;
+      background:rgba(42,31,16,0.45);
+      backdrop-filter:blur(3px);
+      display:none; align-items:flex-start; justify-content:center;
+      padding:1rem; overflow-y:auto;
+    }
+    .settings-overlay.open { display:flex; }
+    .settings-panel {
+      background:var(--card); border:1px solid var(--border); border-radius:16px;
+      padding:1.5rem; width:100%; max-width:420px; margin-top:3.5rem;
+      box-shadow:0 24px 60px rgba(42,31,16,0.25);
+      animation:fadeIn 0.2s ease; position:relative;
+    }
+    .settings-close {
+      position:absolute; top:0.75rem; inset-inline-end:0.75rem;
+      background:none; border:none; cursor:pointer;
+      font-size:1.2rem; color:var(--muted-l); line-height:1;
+      padding:0.2rem 0.4rem; border-radius:6px; transition:all 0.15s;
+    }
+    .settings-close:hover { color:var(--warm); background:rgba(160,104,32,0.08); }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
 
-        .pulse-attention {
-            animation: strong-pulse 1.6s infinite ease-in-out; 
-            display: inline-block;
-        }
+    .settings-title { font-family:var(--ui); font-size:0.85rem; color:var(--muted); margin-bottom:1rem; text-align:center; }
+    .settings-grid  { display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.75rem; margin-bottom:1rem; }
+    .settings-field label { display:block; font-family:var(--ui); font-size:0.75rem; color:var(--muted); margin-bottom:0.4rem; text-align:center; }
+    .settings-field.step-field label { color:var(--warm); }
+    .settings-field.step-field .settings-input { border-color:rgba(160,104,32,0.35); }
+    .settings-input {
+      width:100%; background:var(--card); border:1px solid var(--border); border-radius:10px;
+      color:var(--ink); font-family:var(--serif); font-size:1.4rem; font-weight:600;
+      padding:0.45rem 0.6rem; outline:none; text-align:center; transition:border-color 0.2s; direction:ltr;
+    }
+    .settings-input:focus { border-color:rgba(160,104,32,0.5); }
 
-        .tabs-wrapper {
-            display: flex;
-            gap: 4px;
-            overflow-x: auto;
-            padding: 0 5px;
-            margin-bottom: -1px;
-            position: relative;
-            z-index: 2;
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch;
-        }
-        .tabs-wrapper::-webkit-scrollbar { display: none; }
+    .lang-section { margin-bottom:1rem; }
+    .lang-lbl { font-family:var(--ui); font-size:0.75rem; color:var(--muted); text-align:center; margin-bottom:0.5rem; }
+    .lang-row { display:flex; gap:0.4rem; justify-content:center; direction:ltr; flex-wrap:wrap; }
+    .lang-btn {
+      background:var(--card); border:1px solid var(--border); border-radius:10px;
+      color:var(--muted); font-family:'Inter',system-ui,sans-serif; font-size:0.75rem; font-weight:600;
+      padding:0.35rem 0.65rem; cursor:pointer; transition:all 0.18s; letter-spacing:0.03em;
+    }
+    .lang-btn:hover { color:var(--warm); border-color:rgba(160,104,32,0.4); }
+    .lang-btn.active { background:var(--warm); color:#faf5ec; border-color:var(--warm); }
 
-        .tab-item {
-            flex: 0 0 auto;
-            padding: 10px 18px;
-            font-size: 14px;
-            font-weight: bold;
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
-            background: #e2d7be;
-            border: 1px solid #e6dcbf;
-            border-bottom: none;
-            color: #70583d;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
-        
-        .tab-item.active-tab {
-            background: #f6f0e3;
-            color: #2d1b07;
-            border-color: #e6dcbf;
-            border-bottom: 1px solid #f6f0e3;
-            padding-bottom: 11px;
-            font-weight: 800;
-        }
-        
-        .tab-item.completed-tab { background: #9e6b26; color: #fdfbf7; border-color: #9e6b26; opacity: 0.8; }
-        .tab-item.locked-tab { background: #e6dcbf; color: #a69c83; cursor: not-allowed; opacity: 0.5; }
+    .settings-divider {
+      display:flex; align-items:center; gap:0.5rem; margin:0.75rem 0 0.6rem;
+    }
+    .settings-divider span { font-family:var(--ui); font-size:0.72rem; color:var(--muted-l); white-space:nowrap; }
+    .settings-divider::before, .settings-divider::after { content:''; flex:1; height:1px; background:var(--border); }
 
-        .active-content-box {
-            border: 1px solid #e6dcbf;
-            border-radius: 12px;
-            border-top-left-radius: 4px; 
-            border-top-right-radius: 4px;
-            padding: 20px;
-            background: #f6f0e3;
-            position: relative;
-            z-index: 1;
-            box-shadow: 0 4px 15px rgba(45, 27, 7, 0.02);
-        }
-        body.rtl .active-content-box { text-align: right; }
-        body.ltr .active-content-box { text-align: left; }
+    .settings-apply {
+      width:100%; background:var(--warm); color:#faf5ec; border:none; border-radius:10px;
+      font-family:var(--ui); font-size:0.9rem; padding:0.7rem; cursor:pointer; transition:all 0.18s;
+    }
+    .settings-apply:hover { background:#8a5818; }
+    .settings-note { font-family:var(--ui); font-size:0.72rem; color:var(--muted-l); margin-top:0.6rem; text-align:center; }
 
-        .page-title-setup {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 18px;
-            font-weight: bold;
-            color: #2d1b07;
-        }
+    .rule { display:flex; align-items:center; gap:0.75rem; margin:1.25rem 0; }
+    .rule::before,.rule::after { content:''; flex:1; height:1px; background:var(--border); }
+    .rule-dot { width:4px; height:4px; background:var(--warm-d); border-radius:50%; opacity:0.5; }
 
-        .light-setup-btn {
-            font-size: 13px;
-            font-weight: 600;
-            color: #9e6b26;
-            background: #fdfbf7;
-            border: 1px solid #e6dcbf;
-            padding: 8px 14px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
-        }
-        .light-setup-btn:active { background: #e6dcbf; transform: scale(0.95); }
-        
-        .light-setup-btn.placeholder-style {
-            background: #f1ebd9;
-            color: #70583d;
-            border: 1px dashed #ba833c;
-        }
+    .counter-today-row {
+      display:grid; grid-template-columns:1fr 1px 1fr;
+      margin-bottom:1rem;
+      background:var(--stat); border:1px solid var(--border); border-radius:10px; overflow:hidden;
+    }
+    .counter-display {
+      text-align:center; margin-bottom:0; padding:0.75rem 0.5rem;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+    }
+    .counter-today-divider { background:var(--border); }
+    .counter-num { font-family:var(--num); font-size:2.8rem; font-weight:700; color:var(--ink);
+      line-height:1; letter-spacing:-0.02em;
+      font-variant-numeric:lining-nums tabular-nums;
+      font-feature-settings:"lnum" 1,"tnum" 1; }
+    .counter-num.pop { animation:pop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+    .counter-sep   { font-family:var(--num); font-size:1.3rem; color:var(--muted-l); font-weight:400; }
+    .counter-total { font-family:var(--num); font-size:0.95rem; color:var(--muted-l); font-weight:400; }
+    .counter-label { font-family:var(--ui); font-size:0.75rem; color:var(--muted); margin-bottom:0.4rem; width:100%; text-align:center; }
+    .counter-row   { display:flex; align-items:center; justify-content:center; gap:0.3rem; direction:ltr; width:100%; }
+    .today-mini {
+      text-align:center; flex-shrink:0; padding:0.75rem 0.5rem;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+    }
+    .today-mini .lbl { font-family:var(--ui); font-size:0.75rem; color:var(--muted); margin-bottom:0.4rem; width:100%; text-align:center; }
+    .today-mini .today-pages {
+      font-family:var(--num); font-size:2rem; font-weight:700; color:var(--ink);
+      line-height:1; letter-spacing:-0.02em; font-variant-numeric:lining-nums tabular-nums;
+      font-feature-settings:"lnum" 1,"tnum" 1;
+      direction:ltr; display:block; width:100%; text-align:center;
+    }
+    .done-banner-inline { text-align:center; flex:1; padding:0.75rem 0.5rem; }
+    .done-banner-inline .done-title { font-size:1.4rem; }
+    .done-banner-inline .done-sub   { font-size:0.78rem; }
 
-        .page-title-centered {
-            font-size: 18px;
-            font-weight: 800;
-            color: #2d1b07;
-            text-align: center;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #e6dcbf;
-            display: block;
-        }
+    .progress-section { margin-bottom:1.75rem; }
+    .progress-meta { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:0.75rem; }
+    .progress-lbl  { font-family:var(--ui); font-size:0.82rem; color:var(--muted); }
+    .progress-pct  { font-family:var(--num); font-size:1.15rem; font-weight:700; color:var(--warm); direction:ltr; }
+    .track {
+      height:8px; direction:ltr;
+      background:rgba(160,104,32,0.12); border-radius:99px; overflow:hidden; position:relative;
+      box-shadow:inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .fill {
+      height:100%; float:left; background:var(--warm); border-radius:99px;
+      transition:width 0.75s cubic-bezier(0.34,1.56,0.64,1); position:relative;
+      box-shadow:0 0 6px rgba(160,104,32,0.35);
+    }
+    .fill::after {
+      content:''; position:absolute; right:-1px; top:50%; transform:translateY(-50%);
+      width:13px; height:13px; background:var(--warm-d); border-radius:50%;
+      box-shadow:0 0 8px rgba(160,104,32,0.5);
+    }
 
-        .sections-list { display: flex; flex-direction: column; gap: 10px; margin-top: 5px; }
+    .finish-row {
+      display:flex; align-items:center; justify-content:center; gap:0.5rem;
+      margin-bottom:0.6rem; padding:0.6rem 1rem;
+      background:var(--stat); border:1px solid var(--border); border-radius:10px;
+    }
+    .finish-icon { font-size:1rem; }
+    .finish-lbl  { font-family:var(--ui); font-size:0.82rem; color:var(--muted); }
+    .finish-val  { font-family:var(--num); font-size:1.1rem; font-weight:700; color:var(--ink); }
 
-        .section-item {
-            background: #fdfbf7;
-            color: #2d1b07;
-            border: 1px solid #e6dcbf;
-            padding: 14px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-sizing: border-box;
-        }
-        .section-item.locked { background: #f1ebd9; color: #a69c83; border-style: dashed; }
-        .section-item.done { background: #9e6b26 !important; color: #fdfbf7; opacity: 0.8; }
+    .stats {
+      display:grid; grid-template-columns:1fr 1px 1fr; margin-bottom:0.75rem;
+      background:var(--stat); border:1px solid var(--border); border-radius:10px; overflow:hidden;
+    }
+    .stat-divider { background:var(--border); }
+    .stat     { padding:1rem; text-align:center; }
+    .stat-val { font-family:var(--num); font-size:2rem; font-weight:700; color:var(--ink); line-height:1; margin-bottom:0.3rem; direction:ltr; }
+    .stat-lbl { font-family:var(--ui); font-size:0.75rem; color:var(--muted); }
 
-        /* OVERLAY */
-        #click-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #fdfbf7; 
-            z-index: 9999;
-            box-sizing: border-box;
-            padding: 20px;
-            flex-direction: column;
-            justify-content: space-between; 
-            align-items: center;
-        }
-        
-        .overlay-top-row {
-            display: flex;
-            direction: ltr !important; 
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            max-width: 450px;
-            margin-top: 10px;
-            gap: 10px;
-        }
+    .btn-status-share {
+      width:100%; display:flex; align-items:center; justify-content:center; gap:0.5rem;
+      background:transparent; border:1px solid var(--border); border-radius:10px;
+      color:var(--muted); font-family:var(--ui); font-size:0.82rem;
+      padding:0.65rem; cursor:pointer; transition:all 0.18s; margin-bottom:0.75rem;
+    }
+    .btn-status-share:hover { color:var(--warm); border-color:rgba(160,104,32,0.4); background:rgba(160,104,32,0.05); }
 
-        .overlay-header { 
-            font-size: 19px; 
-            font-weight: 800; 
-            color: #2d1b07; 
-            text-align: center;
-            flex: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+    .custom-section { margin-bottom:1.25rem; border:1px solid var(--border); border-radius:10px; }
+    .custom-toggle {
+      width:100%; background:var(--stat); border:none; padding:0.7rem 1rem;
+      display:flex; align-items:center; justify-content:space-between;
+      cursor:pointer; color:var(--muted); font-family:var(--ui); font-size:0.82rem; transition:all 0.18s;
+    }
+    .custom-toggle:hover { color:var(--warm); background:rgba(160,104,32,0.06); }
+    .arrow { transition:transform 0.25s; display:inline-block; }
+    .custom-toggle.open .arrow { transform:rotate(180deg); }
+    .custom-body  { display:none; padding:0.5rem 0.75rem 0.75rem; background:var(--stat); border-top:1px solid var(--border); overflow:hidden; }
+    .custom-body.open { display:block; }
+    .custom-row   { display:flex; gap:0.5rem; align-items:stretch; direction:ltr; width:100%; box-sizing:border-box; }
+    .btn-custom {
+      flex-shrink:0; width:5.5rem; background:rgba(160,104,32,0.1); border:1px solid rgba(160,104,32,0.3); border-radius:10px;
+      color:var(--warm); font-family:var(--ui); font-size:0.9rem; font-weight:600;
+      padding:0.55rem 0.5rem; cursor:pointer; white-space:nowrap; transition:all 0.18s;
+    }
+    .custom-input {
+      flex:1; min-width:0; background:var(--card); border:1px solid var(--border); border-radius:10px;
+      color:var(--ink); font-family:var(--num); font-size:1.4rem; font-weight:700;
+      padding:0.5rem 0.5rem; outline:none; text-align:center; transition:border-color 0.2s; direction:ltr;
+    }
+    .custom-input:focus { border-color:rgba(160,104,32,0.5); }
+    .custom-input::placeholder { color:var(--muted-l); font-size:1rem; font-style:italic; font-weight:300; }
+    .custom-hint { font-family:var(--ui); font-size:0.75rem; color:var(--muted); margin-top:0.5rem; }
+    .btn-custom:hover { background:rgba(160,104,32,0.18); }
 
-        .abort-btn {
-            background: #f6f0e3; 
-            color: #70583d; 
-            border: 1px solid #e6dcbf;
-            padding: 8px 18px; 
-            border-radius: 20px; 
-            font-size: 13px; 
-            font-weight: bold;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: background 0.2s;
-        }
-        .abort-btn:active { background: #e6dcbf; }
+    .btn-row { display:grid; grid-template-columns:1fr 3fr 1fr; gap:0.5rem; direction:ltr; }
+    .btn { border:none; border-radius:10px; cursor:pointer; transition:background 0.18s; padding:0.9rem 0.75rem; }
+    .btn:active { opacity:0.85; }
+    .btn-main { background:var(--warm); color:#faf5ec; font-family:var(--ui); font-size:0.9rem; }
+    .btn-main:hover { background:#8a5818; }
+    .btn-main:disabled { opacity:0.25; cursor:not-allowed; }
+    .btn-label { cursor:default; pointer-events:none; }
+    .btn-label:hover { background:var(--warm); }
+    .btn-side {
+      background:var(--stat); border:1px solid var(--border); color:var(--muted);
+      font-size:1.4rem; font-weight:300; display:flex; align-items:center; justify-content:center; line-height:1;
+      box-shadow:0 2px 6px rgba(0,0,0,0.1);
+    }
+    .btn-side:hover { border-color:rgba(160,104,32,0.4); color:var(--warm); background:rgba(160,104,32,0.06); }
+    .btn-side:active { transform:translateY(1px); box-shadow:none; }
+    .btn-side:disabled { opacity:0.18; cursor:not-allowed; }
 
-        .minus-btn {
-            background: #d9534f; 
-            color: #fdfbf7;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            font-size: 22px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 10px rgba(217, 83, 79, 0.3);
-            user-select: none; -webkit-user-select: none;
-            outline: none !important; -webkit-tap-highlight-color: transparent !important;
-            transition: transform 0.1s;
-        }
-        .minus-btn:active { transform: scale(0.9); }
+    .done-title  { font-family:var(--ui); font-size:2rem; font-weight:700; color:var(--warm); margin-bottom:0.35rem; }
+    .done-sub    { font-family:var(--ui); font-size:0.85rem; color:var(--muted); }
 
-        .timer-display-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin-top: 30px;
-            margin-bottom: auto; 
-            gap: 12px;
-        }
-
-        .overlay-section-timer {
-            font-size: 72px; 
-            font-weight: 300; 
-            color: #9e6b26; 
-            letter-spacing: 1px;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .pause-btn {
-            background: #f6f0e3;
-            color: #2d1b07;
-            border: 1px solid #e6dcbf;
-            border-radius: 30px;
-            padding: 8px 24px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s ease;
-        }
-        .pause-btn:active { transform: scale(0.95); }
-        .pause-btn.paused { 
-            background: #9e6b26; 
-            color: #fdfbf7;
-            border-color: #ba833c;
-            box-shadow: 0 4px 12px rgba(158, 107, 3, 0.3); 
-        }
-
-        .giant-circle-btn {
-            width: 82vw; height: 82vw; max-width: 330px; max-height: 330px;
-            border-radius: 50%; border: none;
-            display: flex; flex-direction: column; justify-content: space-between; align-items: center;
-            box-shadow: 0 10px 30px rgba(45, 27, 7, 0.12); cursor: pointer;
-            padding: 35px 20px; box-sizing: border-box;
-            user-select: none; -webkit-user-select: none;
-            outline: none !important; -webkit-tap-highlight-color: transparent !important;
-            margin-bottom: 30px; 
-            transition: transform 0.1s, opacity 0.2s;
-        }
-        .giant-circle-btn:active { transform: scale(0.96); }
-        .giant-circle-btn.disabled-state { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
-        
-        .circle-round-5 { background-color: #f1ebd9 !important; color: #2d1b07; border: 2px solid #e6dcbf; }
-        .circle-round-4 { background-color: #e2d7be !important; color: #2d1b07; }
-        .circle-round-3 { background-color: #9e6b26 !important; color: #fdfbf7; }
-
-        .circle-top-target { font-size: 19px; font-weight: 800; letter-spacing: 0.5px; }
-        .counter-big { font-size: 115px; font-weight: 900; line-height: 1; }
-        .circle-bottom-info { font-size: 14px; font-weight: bold; opacity: 0.8; }
-
-        #final-screen { display: none; background: #fdfbf7; margin-top: 10px; }
-        
-        .page-report-item { 
-            display: flex; 
-            justify-content: space-between; 
-            padding: 12px 5px; 
-            border-bottom: 1px dashed #e6dcbf; 
-            font-size: 16px;
-        }
-        .page-report-item strong { color: #9e6b26; font-variant-numeric: tabular-nums; }
-
-        .share-elegant-btn {
-            background: #fdfbf7;
-            color: #2d1b07;
-            border: 1px solid #e6dcbf;
-            width: 100%;
-            padding: 14px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 12px;
-            cursor: pointer;
-            margin-top: 18px;
-            box-shadow: 0 4px 12px rgba(45, 27, 7, 0.03);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            transition: background 0.2s;
-        }
-        .share-elegant-btn:active { background: #e6dcbf; }
-        
-        .share-icon-svg {
-            width: 20px;
-            height: 20px;
-            fill: none;
-            stroke: #9e6b26;
-            stroke-width: 2.5;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        #video-wake-lock {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            opacity: 0.01;
-            pointer-events: none;
-        }
-        
-        .clear-cache-btn {
-            background: #d9534f;
-            color: #fdfbf7;
-            border: none;
-            width: 100%;
-            padding: 10px;
-            font-size: 14px;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 25px;
-            opacity: 0.85;
-        }
-        .clear-cache-btn:active { opacity: 1; }
-    </style>
+    .save-hint {
+      text-align:center; margin-top:1.25rem; font-family:var(--ui); font-size:0.72rem;
+      color:var(--muted-l); opacity:0; transition:opacity 0.4s;
+    }
+    .save-hint.show { opacity:1; }
+  </style>
 </head>
-<body class="rtl"> 
+<body>
+<div class="card">
 
-<video id="video-wake-lock" playsinline muted loop></video>
-
-<div class="container" id="main-app">
-    <button class="settings-icon" onclick="openSettings()">⚙️</button>
-
-    <h1 id="txt-title">⏱️ متعقب التوقيت</h1>
-    
-    <div class="dashboard" id="normal-dashboard">
-        <div><span id="txt-global-time">الوقت الكلي</span>:<span id="global-timer" class="time-val">00:00</span></div>
-        <div><span id="txt-page-time">Thumon الحالي</span>:<span id="page-timer" class="time-val">00:00</span></div>
-    </div>
-
-    <div class="final-dashboard-headline" id="final-dashboard" style="display: none;">
-        <span id="txt-final-global-title">الوقت الكلي</span>
-        <span id="final-global-timer-big" class="final-time-big">00:00</span>
-    </div>
-
-    <div id="session-area">
-        <div class="tabs-wrapper" id="tabs-container"></div>
-        <div class="active-content-box" id="active-tab-content"></div>
-    </div>
-
-    <div id="final-screen">
-        <h2 style="color:#9e6b26; margin-top: 10px;" id="txt-finished">🎉 انتهت الجلسة!</h2>
-        <p id="txt-report-desc">إليك تقرير الأداء اليوم:</p>
-        
-        <div id="page-reports-list"></div>
-        
-        <button class="share-elegant-btn" onclick="shareToWhatsApp()">
-            <svg class="share-icon-svg" viewBox="0 0 24 24">
-                <circle cx="18" cy="5" r="3"></circle>
-                <circle cx="6" cy="12" r="3"></circle>
-                <circle cx="18" cy="19" r="3"></circle>
-                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-            </svg>
-            <span id="txt-share-wa">Ergebnis teilen / مشاركة النتيجة</span>
-        </button>
-
-        <button class="start-btn" style="background:#2d1b07; color: #fdfbf7; margin-top:20px;" onclick="triggerNewSessionConfirm()" id="txt-new-session">بدء جلسة جديدة</button>
-    </div>
-</div>
-
-<div id="settings-overlay">
-    <div class="modal-box">
-        <button class="modal-close-btn" onclick="cancelSettings()">✕</button>
-        <h3 style="margin-top:15px;" id="txt-sett-title">Settings</h3>
-        
-        <div class="setup-group">
-            <label for="lang-select">Language / اللغة</label>
-            <select id="lang-select" onchange="changeLanguage(this.value)">
-                <option value="ar" selected>العربية (Arabic)</option>
-                <option value="de">Deutsch (German)</option>
-                <option value="en">English</option>
-                <option value="fr">Français (French)</option>
-                <option value="es">Español (Spanish)</option>
-                <option value="it">Italiano (Italian)</option>
-            </select>
-        </div>
-
-        <div class="setup-group">
-            <label for="input-pages" id="txt-sett-pages-label">كم عدد الأثمان?</label>
-            <input type="number" id="input-pages" min="1" max="50" placeholder="">
-        </div>
-
-        <button class="start-btn pulse-attention" onclick="closeSettings()" id="txt-sett-save">حفظ</button>
-        
-        <button class="clear-cache-btn" onclick="triggerNewSessionConfirm()" id="txt-reset-btn">جلسة جديدة تماماً (مسح الحفظ)</button>
-    </div>
-</div>
-
-<div id="setup-overlay">
-    <div class="modal-box">
-        <h3 id="setup-modal-title" style="margin-top:0; color:#2d1b07;">تجهيز</h3>
-        <p style="font-size:14px; color:#a69c83;" id="txt-modal-desc">إلى كم القسمة?</p>
-        <input type="number" id="modal-sections-input" min="1" max="10" placeholder="" style="margin-bottom: 20px; text-align:center;">
-        <button class="start-btn" onclick="confirmPageSetup()" id="txt-modal-start">بدء</button>
-    </div>
-</div>
-
-<div id="confirm-overlay">
-    <div class="modal-box" style="border: 2px solid #d9534f;">
-        <h3 style="margin-top:5px; color:#d9534f; font-size:20px;" id="confirm-modal-title">⚠️ Achtung / تنبيه</h3>
-        <p style="font-size:15px; color:#2d1b07; line-height:1.5; margin:15px 0;" id="confirm-modal-msg">Möchtest du wirklich eine neue Sitzung starten?</p>
-        <div class="confirm-btn-container">
-            <button class="confirm-btn-yes" onclick="executeResetSession()" id="confirm-txt-yes">Ja / نعم</button>
-            <button class="confirm-btn-no" onclick="closeConfirmOverlay()" id="confirm-txt-no">Abbrechen / إلغاء</button>
-        </div>
-    </div>
-</div>
-
-<div id="click-overlay">
-    <div class="overlay-top-row">
-        <button class="abort-btn" onclick="closeClickOverlay()" id="txt-abort">إلغاء</button>
-        <div class="overlay-header" id="overlay-txt-page">Thumon X - Section Y</div>
-        <button class="minus-btn" onclick="handleMinusTouch()">−</button>
-    </div>
-    
-    <div class="timer-display-container">
-        <div id="overlay-section-timer" class="overlay-section-timer">00:00</div>
-        <button id="section-pause-btn" class="pause-btn" onclick="toggleSectionPause()">
-            <span id="pause-icon">⏸️</span> <span id="pause-text">Pause</span>
-        </button>
-    </div>
-
-    <button id="giant-btn" class="giant-circle-btn" onclick="handleCircleTouch()">
-        <div class="circle-top-target" id="circle-instruction-txt">احفظ 5 مرات</div>
-        <div id="overlay-counter" class="counter-big">0</div>
-        <div id="circle-section-txt" class="circle-bottom-info">Phase 1</div>
+  <div class="top-bar">
+    <button class="settings-btn" id="settingsBtn" onclick="toggleSettings()">
+      <span class="s-icon">⚙</span>
+      <span id="settingsBtnTxt">الإعدادات</span>
     </button>
+    <h1 class="title"><span id="titleMain">متتبّع</span> <em id="titleEm">القراءة</em></h1>
+  </div>
+
+  <div class="settings-overlay" id="settingsOverlay" onclick="overlayClose(event)">
+    <div class="settings-panel" id="settingsPanel">
+      <button class="settings-close" onclick="toggleSettings()">✕</button>
+      <p class="settings-title" id="settingsPanelTitle">إعدادات الكتاب</p>
+      <div class="lang-section">
+        <p class="lang-lbl" id="labelLang">اللغة</p>
+        <div class="lang-row">
+          <button class="lang-btn" data-lang="ar" onclick="setLang('ar')">AR</button>
+          <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+          <button class="lang-btn" data-lang="de" onclick="setLang('de')">DE</button>
+          <button class="lang-btn" data-lang="fr" onclick="setLang('fr')">FR</button>
+          <button class="lang-btn" data-lang="es" onclick="setLang('es')">ES</button>
+          <button class="lang-btn" data-lang="it" onclick="setLang('it')">IT</button>
+        </div>
+      </div>
+      <div class="settings-grid">
+        <div class="settings-field">
+          <label id="labelCurrent">الصفحة الحالية</label>
+          <input class="settings-input" type="number" id="inputSeite" min="0" />
+        </div>
+        <div class="settings-field">
+          <label id="labelTotal">آخر صفحة</label>
+          <input class="settings-input" type="number" id="inputTotal" min="1" />
+        </div>
+        <div class="settings-field step-field">
+          <label id="labelStep">صفحات يومياً</label>
+          <input class="settings-input" type="number" id="inputStep" min="1" />
+        </div>
+      </div>
+
+      <div class="settings-divider"><span id="labelPersonal">معلومات شخصية</span></div>
+      <div class="settings-grid" style="grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+        <div class="settings-field">
+          <label id="labelName">الاسم</label>
+          <input class="settings-input" type="text" id="inputName" style="font-family:var(--ui);font-size:1rem;" />
+        </div>
+        <div class="settings-field">
+          <label id="labelGroup">الصحبة</label>
+          <input class="settings-input" type="text" id="inputGroup" style="font-family:var(--ui);font-size:1rem;" />
+        </div>
+      </div>
+      
+      <button class="settings-apply" id="applyBtn" onclick="applySettings()">تطبيق</button>
+      <p class="settings-note" id="settingsNote"></p>
+      <button class="share-btn share-btn-full" onclick="shareLink()" id="shareBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+        </svg>
+        <span id="shareBtnTxt">App teilen</span>
+      </button>
+    </div>
+  </div><div class="ornament-rule">
+    <svg viewBox="0 0 300 18" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+      <line x1="0" y1="9" x2="113" y2="9" stroke="#c8913a" stroke-width="0.7" opacity="0.55"/>
+      <circle cx="118" cy="9" r="1.8" fill="#c8913a" opacity="0.65"/>
+      <circle cx="123" cy="9" r="1.8" fill="#c8913a" opacity="0.65"/>
+      <circle cx="128" cy="9" r="1.8" fill="#c8913a" opacity="0.65"/>
+      <rect x="140" y="3" width="12" height="12" transform="rotate(45 146 9)" fill="#faf5ec" stroke="#c8913a" stroke-width="1.3" opacity="0.9"/>
+      <rect x="143" y="6" width="6" height="6" transform="rotate(45 146 9)" fill="#c8913a" opacity="0.7"/>
+      <circle cx="163" cy="9" r="1.8" fill="#c8913a" opacity="0.65"/>
+      <circle cx="168" cy="9" r="1.8" fill="#c8913a" opacity="0.65"/>
+      <circle cx="173" cy="9" r="1.8" fill="#c8913a" opacity="0.65"/>
+      <line x1="178" y1="9" x2="300" y2="9" stroke="#c8913a" stroke-width="0.7" opacity="0.55"/>
+    </svg>
+  </div>
+
+  <div class="counter-today-row">
+    <div class="counter-display">
+      <p class="counter-label" id="counterLabel">الصفحة الحالية</p>
+      <div class="counter-row">
+        <span class="counter-num" id="seiteNum">—</span>
+        <span class="counter-sep">/</span>
+        <span class="counter-total" id="totalNum">—</span>
+      </div>
+    </div>
+    <div class="counter-today-divider"></div>
+    <div class="today-mini" id="todayBlock" style="display:none">
+      <p class="lbl" id="todayLblEl">اقرأ اليوم</p>
+      <p class="today-pages" id="todayPages">—</p>
+    </div>
+    <div class="done-banner-inline" id="doneBanner" style="display:none">
+      <p class="done-title" id="doneTitleEl">أحسنت! 🎉</p>
+      <p class="done-sub" id="doneSubEl">لقد أنهيت الكتاب كاملاً</p>
+    </div>
+  </div>
+
+  <div class="progress-section">
+    <div class="progress-meta">
+      <span class="progress-lbl" id="progressLblEl">نسبة التقدّم</span>
+      <span class="progress-pct" id="pctLabel">0 %</span>
+    </div>
+    <div class="track"><div class="fill" id="fillBar" style="width:0%"></div></div>
+  </div>
+
+  <div class="finish-row" id="finishRow" style="display:none">
+    <span class="finish-icon">📅</span>
+    <span class="finish-lbl" id="finishLblEl">—</span>
+    <span class="finish-val" id="finishDateEl">—</span>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <p class="stat-val" id="leftVal">—</p>
+      <p class="stat-lbl" id="leftLblEl">صفحات متبقية</p>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <p class="stat-val" id="daysVal">—</p>
+      <p class="stat-lbl" id="daysLblEl">أيام حتى النهاية</p>
+    </div>
+  </div>
+
+  <button class="btn-status-share" id="statusShareBtn" onclick="shareStatus()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+    </svg>
+    <span id="statusShareBtnTxt">مشاركة التقدّم</span>
+  </button>
+
+  <div class="custom-section" id="customSection">
+    <button class="custom-toggle" id="customToggle" onclick="toggleCustom()">
+      <span id="customToggleLabel">قرأت أكثر من 5 صفحات?</span>
+      <span class="arrow">▾</span>
+    </button>
+    <div class="custom-body" id="customBody">
+      <div class="custom-row">
+        <input class="custom-input" type="number" id="customInput" min="1"
+          onkeydown="if(event.key==='Enter') applyCustom()" />
+        <button class="btn-custom" id="customBtn" onclick="applyCustom()">تسجيل</button>
+      </div>
+      <p class="custom-hint" id="customHint">أدخل عدد الصفحات التي قرأتها</p>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-side" id="undoBtn" onclick="undo()" title="تراجع">−</button>
+    <button class="btn btn-main btn-label" id="mainBtn">+ قرأت 5 صفحات</button>
+    <button class="btn btn-side" id="advBtn"  onclick="advance()">+</button>
+  </div>
+
+  <p class="save-hint" id="saveHint"></p>
 </div>
+<div class="toast" id="toast"></div>
 
 <script>
-    const lng = {
-        de: { title: "⏱️ Zeit-Tracker", gTime: "Gesamtzeit", pTime: "Aktueller Thumon", settTitle: "Einstellungen", settPages: "Wie viele Thumon möchtest du lesen?", settSave: "Speichern & Starten", page: "Thumon", clickToSetup: "Klicke hier, um den Thumon aufzuteilen", modalDesc: "In wie viele Abschnitte hast du diesen Thumon untergeteilt?", modalStart: "Start", section: "Abschnitt", startBtnTxt: "Starten ⏱️", done: "Erledigt", reps: "Wiederholungen", abort: "Abbrechen", finished: "🎉 Session beendet!", reportDesc: "Hier ist deine Auswertung:", newSession: "Neue Session starten", save_5: "Memorieren 5x", rec_4: "Rezitieren 4x", corr_3: "Korrigieren 3x", unitMin: "Min.", phase1: "Phase 1", phase2: "Phase 2", phase3: "Finale Phase", locked: "Gesperrt 🔒", shareWa: "Ergebnis teilen", placeholderTxt: "Zahl tippen...", pause: "Pause", resume: "Weiter", resetBtn: "Sitzung zurücksetzen (Löschen)", confirmMsg: "Möchtest du wirklich eine neue Sitzung starten? Alle aktuellen Zeiten werden gelöscht.", confTitle: "Achtung", yes: "Ja, Neustart", no: "Abbrechen" },
-        en: { title: "⏱️ Time Tracker", gTime: "Total Time", pTime: "Current Thumon", settTitle: "Settings", settPages: "How many Thumon to read?", settSave: "Save & Start", page: "Thumon", clickToSetup: "Click here to divide the Thumon into sections", modalDesc: "How many sections in this Thumon?", modalStart: "Start", section: "Section", startBtnTxt: "Start ⏱️", done: "Done", reps: "Repetitions", abort: "Cancel", finished: "🎉 Session Finished!", reportDesc: "Here is your report:", newSession: "Start New Session", save_5: "Memorize 5x", rec_4: "Recite 4x", corr_3: "Correct 3x", unitMin: "min.", phase1: "Phase 1", phase2: "Phase 2", phase3: "Final Phase", locked: "Locked 🔒", shareWa: "Share Result", placeholderTxt: "Type a number...", pause: "Pause", resume: "Resume", resetBtn: "Reset Session (Clear)", confirmMsg: "Are you sure you want to start a new session? All current data will be lost.", confTitle: "Warning", yes: "Yes, Reset", no: "Cancel" },
-        fr: { title: "⏱️ Chronomètre", gTime: "Temps Total", pTime: "Thumon Actuel", settTitle: "Paramètres", settPages: "Combien de Thumon à lire?", settSave: "Enregistrer & Démarrer", page: "Thumon", clickToSetup: "Cliquez ici pour diviser le Thumon en sections", modalDesc: "En combien de sections?", modalStart: "Démarrer", section: "Section", startBtnTxt: "Démarrer ⏱️", done: "Fait", reps: "Répétitions", abort: "Annuler", finished: "🎉 Session Terminée!", reportDesc: "Voici votre rapport:", newSession: "Nouvelle Session", save_5: "Mémoriser 5x", rec_4: "Réciter 4x", corr_3: "Corriger 3x", unitMin: "min.", phase1: "Phase 1", phase2: "Phase 2", phase3: "Phase Finale", locked: "Verrouillé 🔒", shareWa: "Partager le résultat", placeholderTxt: "Taper un nombre...", pause: "Pause", resume: "Reprendre", resetBtn: "Réinitialiser", confirmMsg: "Voulez-vous vraiment commencer une nouvelle session ? Toutes les données actuelles seront perdues.", confTitle: "Attention", yes: "Oui, Relancer", no: "Annuler" },
-        es: { title: "⏱️ Control de Tiempo", gTime: "Tiempo Total", pTime: "Thumon Actual", settTitle: "Ajustes", settPages: "¿Cuántos Thumon vas a leer?", settSave: "Guardar y Comenzar", page: "Thumon", clickToSetup: "Haga clic aquí para dividir el Thumon en secciones", modalDesc: "¿En cuántas secciones?", modalStart: "Comenzar", section: "Sección", startBtnTxt: "Comenzar ⏱️", done: "Hecho", reps: "Repeticiones", abort: "Cancelar", finished: "🎉 ¡Sesión Terminada!", reportDesc: "Aquí está tu informe:", newSession: "Iniciar Nueva Sesión", save_5: "Memorizar 5x", rec_4: "Recitar 4x", corr_3: "Corregir 3x", unitMin: "min.", phase1: "Fase 1", phase2: "Fase 2", phase3: "Fase Final", locked: "Bloqueado 🔒", shareWa: "Compartir Resultado", placeholderTxt: "Escribe un número...", pause: "Pausa", resume: "Continuar", resetBtn: "Reiniciar Sesión", confirmMsg: "¿Está seguro de que desea iniciar una nueva sesión? Se perderán todos los datos actuales.", confTitle: "Atención", yes: "Sí, Reiniciar", no: "Cancelar" },
-        it: { title: "⏱️ Tracker del Tempo", gTime: "Tempo Total", pTime: "Thumon Attuale", settTitle: "Impostazioni", settPages: "Quanti Thumon da leggere?", settSave: "Salva e Inizia", page: "Thumon", clickToSetup: "Clicca qui per dividere il Thumon in sezioni", modalDesc: "In quante sezioni?", modalStart: "Inizia", section: "Sezione", startBtnTxt: "Inizia ⏱️", done: "Fatto", reps: "Ripetizioni", abort: "Annulla", finished: "🎉 Sessione Terminata!", reportDesc: "Ecco il tuo rapporto:", newSession: "Nuova Sessione", save_5: "Memorizza 5x", rec_4: "Recita 4x", corr_3: "Correggi 3x", unitMin: "min.", phase1: "Fase 1", phase2: "Fase 2", phase3: "Fase Finale", locked: "Bloccato 🔒", shareWa: "Condividi Risultato", placeholderTxt: "Digita un numero...", pause: "Pausa", resume: "Riprendi", resetBtn: "Azzera Sessione", confirmMsg: "Sei sicuro di voler iniziare una nuova sessione? Tutti i dati correnti andranno persi.", confTitle: "Attenzione", yes: "Sì, Riavvia", no: "Annulla" },
-        ar: { title: "⏱️ متعقب التوقيت", gTime: "الوقت الكلي", pTime: "الثُّمن الحالي", settTitle: "الإعدادات", settPages: "كم عدد الأثمان التي تود قراءتها؟", settSave: "حفظ وبدء", page: "ثُمن", clickToSetup: "انقر لتقسيم الثُّمن", modalDesc: "إلى كم القسمة قمت بتقسيم هذا الثُّمن؟", modalStart: "بدء", section: "القسمة", startBtnTxt: "ابدأ ⏱️", done: "تم", reps: "التكرارات", abort: "إلغاء", finished: "🎉 انتهت الجلسة!", reportDesc: "إليك تقرير الأداء اليوم:", newSession: "بدء جلسة جديدة", save_5: "احفظ 5 مرات", rec_4: "استظهر 4 مرات", corr_3: "صحح 3 مرات", unitMin: "دقيقة", phase1: "المرحلة الأولى", phase2: "المرحلة الثانية", phase3: "المرحلة الثالثة والأخيرة", locked: "مغلق 🔒", shareWa: "مشاركة النتيجة", placeholderTxt: "اكتب رقماً...", pause: "إيقاف", resume: "استئناف", resetBtn: "جلسة جديدة تماماً (مسح الحفظ)", confirmMsg: "هل أنت متأكد من بدء جلسة جديدة؟ سيتم مسح جميع الأوقات الحالية.", confTitle: "تنبيه هام", yes: "نعم، ابدأ من جديد", no: "إلغاء" }
-    };
+// ── Translations ───────────────────────────────────────────────────
+const T = {
+  ar: {
+    dir:'rtl', locale:'ar-SA-u-nu-latn',
+    eyebrow:'تقدّم القراءة', titleMain:'متتبّع', titleEm:'القراءة',
+    settingsPanelTitle:'إعدادات الكتاب',
+    labelCurrent:'الصفحة الحالية', labelTotal:'آخر صفحة', labelStep:'صفحات يومياً',
+    labelLang:'اللغة', apply:'تطبيق',
+    note:'الحفظ في المتصفح · "مشاركة" لإرسال الكتاب',
+    btnSettings:'الإعدادات', btnShare:'مشاركة التطبيق',
+    counterLabel:'الصفحة الحالية', progressLbl:'نسبة التقدّم',
+    todayLbl:'اقرأ اليوم', dailyLbl:'يومياً',
+    leftLbl:'صفحات متبقية', daysLbl:'أيام حتى النهاية',
+    finishBy:'يختم في',
+    labelPersonal:'معلومات شخصية', labelName:'الاسم', labelGroup:'الصحبة',
+    customMore: n=>`قرأت أكثر من ${n} صفحات؟`,
+    customBtn:'تسجيل', customHint:'أدخل عدد الصفحات التي قرأتها', customPlaceholder:'مثال: 12',
+    mainBtn: n=>`+ قرأت ${n} صفحات`, pagesUnit: n=>`${n} صفحات`,
+    doneTitle:'أحسنت! 🎉', doneSub:'لقد أنهيت الكتاب كاملاً',
+    doneBadgeText:'✓ قرأت اليوم',
+    saved:'✓ تم الحفظ', copied:'✓ تم نسخ الرابط — أرسله لأصدقائك!', undoTitle:'تراجع',
+    shareText:'تابع تقدّمك في قراءة الكتاب',
+    statusShareBtn:'مشاركة التقدّم',
+    whatsappGroup:'الصحبة'
+  },
+  en: {
+    dir:'ltr', locale:'en-US',
+    eyebrow:'Reading Progress', titleMain:'Reading', titleEm:'Tracker',
+    settingsPanelTitle:'Book Settings',
+    labelCurrent:'Current Page', labelTotal:'Last Page', labelStep:'Pages / Day',
+    labelLang:'Language', apply:'Apply',
+    note:'Saved in browser · Use "Share" to send the book',
+    btnSettings:'Settings', btnShare:'Share App',
+    counterLabel:'Current Page', progressLbl:'Progress',
+    todayLbl:'Read Today', dailyLbl:'Daily',
+    leftLbl:'Pages Left', daysLbl:'Days to Finish',
+    finishBy:'Finish by',
+    labelPersonal:'Personal Info', labelName:'Name', labelGroup:'Group',
+    customMore: n=>`Read more than ${n} pages?`,
+    customBtn:'Log', customHint:'Enter the number of pages you read', customPlaceholder:'e.g. 12',
+    mainBtn: n=>`+ Read ${n} pages`, pagesUnit: n=>`${n} pages`,
+    doneTitle:'Well done! 🎉', doneSub:"You've finished the entire book",
+    doneBadgeText:'✓ Read today',
+    saved:'✓ Saved', copied:'✓ Link copied — share with friends!', undoTitle:'Undo',
+    shareText:'Track your reading progress together',
+    statusShareBtn:'Share Progress',
+    whatsappGroup:'Gruppe/Sahba'
+  },
+  de: {
+    dir:'ltr', locale:'de-DE',
+    eyebrow:'Lesefortschritt', titleMain:'Lese-', titleEm:'Tracker',
+    settingsPanelTitle:'Bucheinstellungen',
+    labelCurrent:'Aktuelle Seite', labelTotal:'Letzte Seite', labelStep:'Seiten täglich',
+    labelLang:'Sprache', apply:'Anwenden',
+    note:'Im Browser gespeichert · „Teilen" zum Weiterschicken',
+    btnSettings:'Einstellungen', btnShare:'App teilen',
+    counterLabel:'Aktuelle Seite', progressLbl:'Fortschritt',
+    todayLbl:'Heute lesen', dailyLbl:'Täglich',
+    leftLbl:'Seiten übrig', daysLbl:'Tage bis Ende',
+    finishBy:'Fertig am',
+    labelPersonal:'Persönliche Angaben', labelName:'Name', labelGroup:'Gruppe (Sahba)',
+    customMore: n=>`Mehr als ${n} Seiten gelesen?`,
+    customBtn:'Eintragen', customHint:'Anzahl gelesener Seiten eingeben', customPlaceholder:'z.B. 12',
+    mainBtn: n=>`+ ${n} Seiten gelesen`, pagesUnit: n=>`${n} Seiten`,
+    doneTitle:'Geschafft! 🎉', doneSub:'Du hast das Buch fertig gelesen',
+    doneBadgeText:'✓ Heute gelesen',
+    saved:'✓ Gespeichert', copied:'✓ Link kopiert — jetzt teilen!', undoTitle:'Rückgängig',
+    shareText:'Verfolge deinen Lesefortschritt',
+    statusShareBtn:'Fortschritt teilen',
+    whatsappGroup:'Gruppe'
+  },
+  fr: {
+    dir:'ltr', locale:'fr-FR',
+    eyebrow:'Progression de lecture', titleMain:'Suivi de', titleEm:'lecture',
+    settingsPanelTitle:'Paramètres du livre',
+    labelCurrent:'Page actuelle', labelTotal:'Dernière page', labelStep:'Pages par jour',
+    labelLang:'Paramètres', apply:'Appliquer',
+    note:'Sauvegardé dans le navigateur · « Partager » pour envoyer',
+    btnSettings:'Paramètres', btnShare:'Partager l\'app',
+    counterLabel:'Page actuelle', progressLbl:'Progression',
+    todayLbl:"Lire aujourd'hui", dailyLbl:'Par jour',
+    leftLbl:'Pages restantes', daysLbl:'Jours restants',
+    finishBy:'Terminé le',
+    labelPersonal:'Informations personnelles', labelName:'Nom', labelGroup:'Groupe (Sahba)',
+    customMore: n=>`Lu plus de ${n} pages ?`,
+    customBtn:'Enregistrer', customHint:'Entrez le nombre de pages lues', customPlaceholder:'ex : 12',
+    mainBtn: n=>`+ ${n} pages lues`, pagesUnit: n=>`${n} pages`,
+    doneTitle:'Bravo ! 🎉', doneSub:'Vous avez terminé le livre entier',
+    doneBadgeText:'✓ Lu aujourd\'hui',
+    saved:'✓ Sauvegardé', copied:'✓ Lien copié — partagez-le !', undoTitle:'Annuler',
+    shareText:'Suivez votre progression de lecture',
+    statusShareBtn:'Partager la progression',
+    whatsappGroup:'Groupe'
+  },
+  es: {
+    dir:'ltr', locale:'es-ES',
+    eyebrow:'Progreso de lectura', titleMain:'Seguimiento de', titleEm:'leer',
+    settingsPanelTitle:'Configuración del libro',
+    labelCurrent:'Página actual', labelTotal:'Última página', labelStep:'Páginas por día',
+    labelLang:'Idioma', apply:'Aplicar',
+    note:'Guardado en el navegador · Usa "Compartir" para enviar',
+    btnSettings:'Configuración', btnShare:'Compartir app',
+    counterLabel:'Página actual', progressLbl:'Progreso',
+    todayLbl:'Leer hoy', dailyLbl:'Por día',
+    leftLbl:'Páginas restantes', daysLbl:'Días para terminar',
+    finishBy:'Terminar el',
+    labelPersonal:'Información personal', labelName:'Nombre', labelGroup:'Grupo (Sahba)',
+    customMore: n=>`¿Leíste más de ${n} páginas?`,
+    customBtn:'Registrar', customHint:'Ingresa el número de páginas leídas', customPlaceholder:'ej: 12',
+    mainBtn: n=>`+ ${n} páginas leídas`, pagesUnit: n=>`${n} páginas`,
+    doneTitle:'¡Bien hecho! 🎉', doneSub:'Has terminado el libro completo',
+    doneBadgeText:'✓ Leído hoy',
+    saved:'✓ Guardado', copied:'✓ Enlace copiado — ¡compártelo!', undoTitle:'Deshacer',
+    shareText:'Sigue tu progreso de lectura',
+    statusShareBtn:'Compartir progreso',
+    whatsappGroup:'Grupo'
+  },
+  it: {
+    dir:'ltr', locale:'it-IT',
+    eyebrow:'Progresso di lettura', titleMain:'Lettura', titleEm:'Tracker',
+    settingsPanelTitle:'Impostazioni libro',
+    labelCurrent:'Pagina attuale', labelTotal:'Ultima pagina', labelStep:'Pagine al giorno',
+    labelLang:'Atteggiamento', apply:'Applica',
+    note:'Salvato nel browser · Usa "Condividi" per inviare',
+    btnSettings:'Impostazioni', btnShare:'Condividi app',
+    counterLabel:'Pagina attuale', progressLbl:'Progresso',
+    todayLbl:'Leggi oggi', dailyLbl:'Al giorno',
+    leftLbl:'Pagine rimaste', daysLbl:'Giorni alla fine',
+    finishBy:'Finire il',
+    labelPersonal:'Informazioni personali', labelName:'Nom', labelGroup:'Gruppo (Sahba)',
+    customMore: n=>`Letto più di ${n} pagine?`,
+    customBtn:'Registra', customHint:'Inserisci il numero di pagine lette', customPlaceholder:'es. 12',
+    mainBtn: n=>`+ ${n} pagine lette`, pagesUnit: n=>`${n} pagine`,
+    doneTitle:'Bravo! 🎉', doneSub:'Hai finito il livre intero',
+    doneBadgeText:'✓ Letto oggi',
+    saved:'✓ Salvato', copied:'✓ Link copiato — condividilo!', undoTitle:'Annulla',
+    shareText:'Segui il tuo progresso di lettura',
+    statusShareBtn:'Condividi progresso',
+    whatsappGroup:'Gruppo'
+  },
+};
 
-    let currentLang = 'ar';
-    let totalPages = 5;       
-    let defaultSections = 3;  
-    let currentPage = 1;
-    let sessionData = {};
+// ── State ─────────────────────────────────────────────────────────
+const params   = new URLSearchParams(location.search);
+const urlTotal = params.get('total');
+const urlStep  = params.get('step');
+const bookKey  = urlTotal ? `bt_${urlTotal}` : 'bt_default';
 
-    let globalStartTime = null;
-    let globalTimeOffset = 0;
-    let pageStartTime = null;
-    let pageTimeOffset = 0;
-    
-    let sectionStartTime = null; 
-    let sectionTimeOffset = 0;
-    let isSectionPaused = false;
+let lang      = localStorage.getItem('bt_lang')                || 'ar';
+let userName  = localStorage.getItem('bt_name')               || '';
+let userGroup = localStorage.getItem('bt_group')              || '';
+let step      = parseInt(urlStep  || localStorage.getItem(bookKey+'_step')  || '5');
+let total     = parseInt(urlTotal || localStorage.getItem(bookKey+'_total') || '485');
+let seite     = parseInt(localStorage.getItem(bookKey+'_seite')             || '0');
+let history   = JSON.parse(localStorage.getItem(bookKey+'_history')         || '[]');
+let settingsOpen = false, customOpen = false;
+let todayFrom = parseInt(localStorage.getItem(bookKey+'_todayFrom') || '0');
+let todayTo   = parseInt(localStorage.getItem(bookKey+'_todayTo')   || '0');
 
-    let globalInterval = null;
-    let isTimerRunning = false;
-    let isSessionStarted = false;
+function todayStr() { return new Date().toISOString().slice(0,10); }
+function readToday() { return localStorage.getItem(bookKey+'_lastRead') === todayStr(); }
 
-    let activeSectionNum = null;
-    let currentTargetClicks = 5;
-    let currentClicks = 0;
+// ── Dates ─────────────────────────────────────────────────────────
+function getReadingDate() {
+  const d = new Date();
+  if (readToday()) d.setDate(d.getDate() + 1);
+  return d;
+}
 
-    let wakeLockObj = null;
+function getFinishDate(days) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d;
+}
 
-    window.onload = function() {
-        currentLang = localStorage.getItem('tt_lang') || 'ar';
-        document.getElementById('lang-select').value = currentLang;
+function fmtDate(date, locale, opts) {
+  return date.toLocaleDateString(locale, opts);
+}
 
-        let savedPages = localStorage.getItem('tt_pages');
-        if (savedPages) {
-            totalPages = parseInt(savedPages);
-            document.getElementById('input-pages').value = totalPages;
-        }
+// ── Language ──────────────────────────────────────────────────────
+function setLang(l) {
+  lang = l;
+  localStorage.setItem('bt_lang', l);
+  document.documentElement.lang = l;
+  document.documentElement.dir  = T[l].dir;
+  document.querySelectorAll('.lang-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.lang === l)
+  );
+  render();
+}
 
-        let savedSections = localStorage.getItem('tt_sections');
-        if (savedSections) {
-            defaultSections = parseInt(savedSections);
-            document.getElementById('modal-sections-input').value = defaultSections;
-        }
+// ── Save ──────────────────────────────────────────────────────────
+function save() {
+  localStorage.setItem(bookKey+'_step',    step);
+  localStorage.setItem(bookKey+'_total',   total);
+  localStorage.setItem(bookKey+'_seite',   seite);
+  localStorage.setItem(bookKey+'_history', JSON.stringify(history));
+  localStorage.setItem(bookKey+'_todayFrom', todayFrom);
+  localStorage.setItem(bookKey+'_todayTo',   todayTo);
+  localStorage.setItem('bt_name',   userName);
+  localStorage.setItem('bt_group',  userGroup);
+  const h = document.getElementById('saveHint');
+  h.textContent = T[lang].saved;
+  h.classList.add('show');
+  clearTimeout(h._t);
+  h._t = setTimeout(()=>h.classList.remove('show'), 1800);
+}
 
-        changeLanguage(currentLang); 
-        
-        if (localStorage.getItem('tt_session_active_data')) {
-            loadSessionProgress();
-        } else {
-            initSessionStructure();
-        }
-        
-        setupFakeVideoWakeLock();
+// ── Render ────────────────────────────────────────────────────────
+function render() {
+  const t      = T[lang];
+  const locale = t.locale;
+  const pct    = total > 0 ? Math.min((seite/total)*100, 100) : 0;
+  const left   = Math.max(total - seite, 0);
+  const days   = left > 0 ? Math.ceil(left/step) : 0;
+  const from   = seite + 1;
+  const to     = Math.min(seite + step, total);
+  const fertig = seite >= total;
+  const doneT  = readToday();
 
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible' && isSessionStarted) {
-                requestNativeWakeLock();
-                activateWakeLockVideo();
-            }
-        });
-    };
+  const map = {
+    eyebrow:t.eyebrow, titleMain:t.titleMain, titleEm:t.titleEm,
+    settingsPanelTitle:t.settingsPanelTitle, labelCurrent:t.labelCurrent,
+    labelTotal:t.labelTotal, labelStep:t.labelStep, labelLang:t.labelLang,
+    applyBtn:t.apply, settingsNote:t.note, settingsBtnTxt:t.btnSettings,
+    shareBtnTxt:t.btnShare, counterLabel:t.counterLabel, progressLblEl:t.progressLbl,
+    todayLblEl:t.todayLbl, leftLblEl:t.leftLbl,
+    daysLblEl:t.daysLbl, customBtn:t.customBtn, customHint:t.customHint,
+    doneTitleEl:t.doneTitle, doneSubEl:t.doneSub, finishLblEl:t.finishBy,
+    statusShareBtnTxt:t.statusShareBtn, labelPersonal:t.labelPersonal, 
+    labelName:t.labelName, labelGroup:t.labelGroup
+  };
+  Object.entries(map).forEach(([id,txt]) => { const e=document.getElementById(id); if(e) e.textContent=txt; });
 
-    async function requestNativeWakeLock() {
-        if ('wakeLock' in navigator) {
-            try {
-                wakeLockObj = await navigator.wakeLock.request('screen');
-            } catch (err) {
-                console.log("Native Wake Lock fehlgeschlagen.");
-            }
-        }
+  document.getElementById('undoBtn').title             = t.undoTitle;
+  document.getElementById('customInput').placeholder   = t.customPlaceholder;
+
+  // Dynamic values
+  document.getElementById('seiteNum').textContent          = seite;
+  document.getElementById('totalNum').textContent          = total;
+  document.getElementById('pctLabel').textContent          = pct.toFixed(1)+' %';
+  document.getElementById('fillBar').style.width           = pct.toFixed(2)+'%';
+  document.getElementById('leftVal').textContent           = left;
+  document.getElementById('daysVal').textContent           = fertig ? '✓' : days;
+  document.getElementById('todayPages').textContent        = from === to ? `${from}` : `${from} – ${to}`;
+  document.getElementById('mainBtn').textContent           = t.mainBtn(step);
+  document.getElementById('customToggleLabel').textContent = t.customMore(step);
+
+  // "Done today" styling
+  document.getElementById('todayBlock').classList.toggle('done-today', doneT);
+
+  // Finish date
+  if (!fertig && days > 0) {
+    const fin = getFinishDate(days);
+    document.getElementById('finishDateEl').textContent =
+      fmtDate(fin, locale, {day:'numeric', month:'long', year:'numeric'});
+    document.getElementById('finishRow').style.display = 'flex';
+  } else {
+    document.getElementById('finishRow').style.display = 'none';
+  }
+
+  // Visibility
+  document.getElementById('todayBlock').style.display    = fertig ? 'none'  : 'block';
+  document.getElementById('doneBanner').style.display    = fertig ? 'block' : 'none';
+  document.getElementById('customSection').style.display = fertig ? 'none'  : 'block';
+  
+  const advBtn = document.getElementById('advBtn');
+  if (advBtn) advBtn.disabled = fertig;
+  document.getElementById('undoBtn').disabled  = history.length === 0;
+}
+
+function pop() {
+  const el = document.getElementById('seiteNum');
+  el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+}
+
+// ── Actions ───────────────────────────────────────────────────────
+function markReadToday() {
+  localStorage.setItem(bookKey+'_lastRead', todayStr());
+}
+
+// ── Hizb Calculation ──────────────────────────────────────────────
+function advance() {
+  if (seite >= total) return;
+  const prev = seite;
+  history.push(seite); seite = Math.min(seite + step, total);
+  todayFrom = prev + 1; todayTo = seite;
+  markReadToday(); save(); render(); pop();
+}
+function undo() {
+  if (!history.length) return;
+  seite = history.pop();
+  todayFrom = 0; todayTo = 0;
+  save(); render(); pop();
+}
+function applyCustom() {
+  const n = parseInt(document.getElementById('customInput').value, 10);
+  if (isNaN(n) || n <= 0) return;
+  const prev = seite;
+  history.push(seite); seite = Math.min(seite + n, total);
+  todayFrom = prev + 1; todayTo = seite;
+  document.getElementById('customInput').value = '';
+  toggleCustom(false); markReadToday(); save(); render(); pop();
+}
+function toggleCustom(force) {
+  customOpen = force===false ? false : !customOpen;
+  document.getElementById('customBody').classList.toggle('open', customOpen);
+  document.getElementById('customToggle').classList.toggle('open', customOpen);
+}
+function overlayClose(e) {
+  if (e.target === document.getElementById('settingsOverlay')) toggleSettings();
+}
+function toggleSettings() {
+  settingsOpen = !settingsOpen;
+  document.getElementById('settingsOverlay').classList.toggle('open', settingsOpen);
+  document.getElementById('settingsBtn').classList.toggle('active', settingsOpen);
+  if (settingsOpen) {
+    document.getElementById('inputSeite').value = seite;
+    document.getElementById('inputTotal').value = total;
+    document.getElementById('inputStep').value  = step;
+    document.getElementById('inputName').value  = userName;
+    document.getElementById('inputGroup').value = userGroup;
+  }
+}
+function applySettings() {
+  const ns = parseInt(document.getElementById('inputSeite').value,10);
+  const nt = parseInt(document.getElementById('inputTotal').value,10);
+  const np = parseInt(document.getElementById('inputStep').value,10);
+  userName  = document.getElementById('inputName').value.trim();
+  userGroup = document.getElementById('inputGroup').value.trim();
+  if (!isNaN(nt)&&nt>0) total=nt;
+  if (!isNaN(np)&&np>0) step=np;
+  if (!isNaN(ns)&&ns>=0) { if(ns!==seite) history=[]; seite=Math.min(ns,total); }
+  toggleSettings(); save(); render(); pop();
+}
+
+function formatHizbRange(fromPage, toPage) {
+  if (!fromPage || !toPage || fromPage > toPage) return '';
+  const maxT       = (h) => h === 1 ? 8 : 8;
+  const hizbEndPg  = (h) => h === 1 ? 10 : 10 + (h - 1) * 8;
+
+  const lines = [];
+  let page = fromPage;
+
+  while (page <= toPage) {
+    const s = getHizbThumn(page);
+    if (!s) break;
+
+    const endPage = Math.min(toPage, hizbEndPg(s.hizb));
+    const e       = getHizbThumn(endPage);
+
+    if (s.thumn === 1 && e.thumn === maxT(s.hizb)) {
+      lines.push(`📖 الحزب ${s.hizb}`);
     }
-
-    function releaseNativeWakeLock() {
-        if (wakeLockObj !== null) {
-            wakeLockObj.release();
-            wakeLockObj = null;
-        }
+    else if (s.thumn === e.thumn) {
+      lines.push(`📖 ثمن ${s.thumn} من الحزب ${s.hizb}`);
     }
-
-    function initSessionStructure() {
-        sessionData = {};
-        for(let p = 1; p <= totalPages; p++) {
-            sessionData[p] = { sectionsCount: null, doneSections: {}, elapsedTime: 0, isSetup: false, isCompleted: false };
-        }
-        currentPage = 1;
-        isSessionStarted = false;
-        globalTimeOffset = 0;
-        pageTimeOffset = 0;
-        clearInterval(globalInterval);
-        deactivateWakeLockVideo();
-        releaseNativeWakeLock();
-        
-        document.getElementById('global-timer').innerText = "00:00";
-        document.getElementById('page-timer').innerText = "00:00";
-        document.getElementById('final-global-timer-big').innerText = "00:00";
-        
-        document.getElementById('normal-dashboard').style.display = 'flex';
-        document.getElementById('final-dashboard').style.display = 'none';
-        
-        document.getElementById('session-area').style.display = 'flex';
-        document.getElementById('session-area').style.flexDirection = 'column';
-        document.getElementById('final-screen').style.display = 'none';
-        
-        saveSessionProgress(); 
-        renderTabsAndActiveContent();
+    else {
+      lines.push(`📖 ثمن ${s.thumn}-${e.thumn} من الحزب ${s.hizb}`);
     }
+    page = hizbEndPg(s.hizb) + 1;
+  }
+  return lines.join('\n');
+}
 
-    function saveSessionProgress() {
-        localStorage.setItem('tt_session_active_data', JSON.stringify(sessionData));
-        localStorage.setItem('tt_current_page', currentPage);
-        localStorage.setItem('tt_is_started', isSessionStarted);
-        localStorage.setItem('tt_global_offset', globalTimeOffset);
-        localStorage.setItem('tt_page_offset', pageTimeOffset);
+function getHizbThumn(page) {
+  if (page <= 0) return null;
+  
+  if (page <= 10) {
+    if (page >= 1 && page <= 3) {
+      return { hizb: 1, thumn: 1 };
     }
+    return { hizb: 1, thumn: page - 2 };
+  }
+  
+  const after = page - 10;
+  return {
+    hizb:  Math.floor((after - 1) / 8) + 2,
+    thumn: ((after - 1) % 8) + 1,
+  };
+}
 
-    function loadSessionProgress() {
-        sessionData = JSON.parse(localStorage.getItem('tt_session_active_data'));
-        currentPage = parseInt(localStorage.getItem('tt_current_page')) || 1;
-        isSessionStarted = (localStorage.getItem('tt_is_started') === 'true');
-        globalTimeOffset = parseInt(localStorage.getItem('tt_global_offset')) || 0;
-        pageTimeOffset = parseInt(localStorage.getItem('tt_page_offset')) || 0;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2800);
+}
 
-        document.getElementById('global-timer').innerText = formatTime(globalTimeOffset);
-        document.getElementById('page-timer').innerText = formatTime(pageTimeOffset);
-        document.getElementById('final-global-timer-big').innerText = formatTime(globalTimeOffset);
+function shareStatus() {
+  const t      = T[lang];
+  const locale = t.locale;
+  const pct    = total > 0 ? Math.min((seite/total)*100,100) : 0;
+  const left   = Math.max(total-seite,0);
+  const days   = left>0 ? Math.ceil(left/step) : 0;
+  const from   = seite+1;
+  const to     = Math.min(seite+step,total);
+  const fin    = getFinishDate(days);
+  const finStr = fmtDate(fin, locale, {day:'numeric',month:'long',year:'numeric'});
+  const today  = fmtDate(new Date(), locale, {weekday:'long', day:'numeric', month:'long', year:'numeric'});
 
-        if (isSessionStarted) {
-            globalStartTime = Date.now();
-            pageStartTime = Date.now();
-            globalInterval = setInterval(updateTimers, 1000);
-            requestNativeWakeLock();
-            activateWakeLockVideo();
-        }
+  const rangeFrom = todayFrom > 0 ? todayFrom : (seite > 0 ? seite : from);
+  const rangeTo   = todayTo   > 0 ? todayTo   : (seite > 0 ? seite : to);
+  const hizbRange = formatHizbRange(rangeFrom, rangeTo);
+  const hizbLine  = hizbRange ? `${hizbRange}\n` : '';
+  const dua = '\nاللهم أعنا على ذكرك وشكرك وحسن عبادتك 🤲';
 
-        let finalCheck = true;
-        for (let p in sessionData) {
-            if (!sessionData[p].isCompleted) finalCheck = false;
-        }
-        if (finalCheck && isSessionStarted) {
-            endEntireSession();
-        } else {
-            renderTabsAndActiveContent();
-        }
-    }
+  // Header Construction
+  let headerBlock = `🗓️ ${today}\n`;
+  if (userName)  headerBlock += `👤 ${userName}\n`;
+  if (userGroup) headerBlock += `👥 الصحبة: ${userGroup}\n`;
 
-    /* Öffnet das neue, formschöne Bestätigungs-Overlay */
-    function triggerNewSessionConfirm() {
-        document.getElementById('confirm-modal-title').innerText = lng[currentLang].confTitle;
-        document.getElementById('confirm-modal-msg').innerText = lng[currentLang].confirmMsg;
-        document.getElementById('confirm-txt-yes').innerText = lng[currentLang].yes;
-        document.getElementById('confirm-txt-no').innerText = lng[currentLang].no;
-        document.getElementById('confirm-overlay').style.display = 'flex';
-    }
+  // Arabic divider line — starts with Arabic letter so WhatsApp renders RTL
+  // Using Arabic Tatweel (ـ) repeated, which is an RTL character
+  const dividerLine = "ـــــــــــــــــــــــــــــــــ\n";
 
-    function closeConfirmOverlay() {
-        document.getElementById('confirm-overlay').style.display = 'none';
-    }
+  const rest = {
+    ar: `📄 الصفحة: ${seite} / ${total}\n📊 التقدّم: ${pct.toFixed(1)} %\n🏁 يختم في: ${finStr}\n📉 المتبقي: ${left} صفحة · ${days} يوماً${dua}`,
+    en: `📄 Page: ${seite} / ${total}\n📊 Progress: ${pct.toFixed(1)} %\n🏁 Finish by: ${finStr}\n📉 Left: ${left} pages · ${days} days${dua}`,
+    de: `📄 Seite: ${seite} / ${total}\n📊 Fortschritt: ${pct.toFixed(1)} %\n🏁 Fertig am: ${finStr}\n📉 Noch: ${left} Seiten · ${days} Tage${dua}`,
+    fr: `📄 Page : ${seite} / ${total}\n📊 Progression : ${pct.toFixed(1)} %\n🏁 Terminé le : ${finStr}\n📉 Restant : ${left} pages · ${days} jours${dua}`,
+    es: `📄 Página: ${seite} / ${total}\n📊 Progreso: ${pct.toFixed(1)} %\n🏁 Terminar el: ${finStr}\n📉 Restante: ${left} páginas · ${days} días${dua}`,
+    it: `📄 Pagina: ${seite} / ${total}\n📊 Progresso: ${pct.toFixed(1)} %\n🏁 Finire il: ${finStr}\n📉 Rimaste: ${left} pagine · ${days} giorni${dua}`,
+  };
 
-    function executeResetSession() {
-        closeConfirmOverlay();
-        resetEntireSession();
-    }
+  const msgs = {};
+  ['ar','en','de','fr','es','it'].forEach(l => {
+    msgs[l] = `${headerBlock}${dividerLine}${hizbLine}${dividerLine}${rest[l]}`;
+  });
 
-    function resetEntireSession() {
-        localStorage.removeItem('tt_session_active_data');
-        localStorage.removeItem('tt_current_page');
-        localStorage.removeItem('tt_is_started');
-        localStorage.removeItem('tt_global_offset');
-        localStorage.removeItem('tt_page_offset');
-        document.getElementById('settings-overlay').style.display = 'none';
-        initSessionStructure();
-    }
+  const text = msgs[lang] || msgs.en;
+  if (navigator.share) {
+    navigator.share({ text }).catch(err => { if (err.name !== 'AbortError') fallbackShare(text); });
+  } else if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).then(() => showToast(t.copied));
+  } else {
+    window.prompt('', text);
+  }
+}
 
-    function setupFakeVideoWakeLock() {
-        const video = document.getElementById('video-wake-lock');
-        video.src = "data:video/mp4;base64,AAAAHGZ0eXBtcDQyAAAAAG1wStandardmI2AAAAAGZyZWUAAAAsbWRhdA==;";
-    }
-
-    function activateWakeLockVideo() {
-        const video = document.getElementById('video-wake-lock');
-        if (video) video.play().catch(e => console.log("WakeLock Video blockiert."));
-    }
-
-    function deactivateWakeLockVideo() {
-        const video = document.getElementById('video-wake-lock');
-        if (video) video.pause();
-    }
-
-    function changeLanguage(langKey) {
-        currentLang = langKey;
-        localStorage.setItem('tt_lang', langKey); 
-        document.body.className = (langKey === 'ar') ? "rtl" : "ltr";
-        
-        document.getElementById('txt-title').innerText = lng[langKey].title;
-        document.getElementById('txt-global-time').innerText = lng[langKey].gTime;
-        document.getElementById('txt-final-global-title').innerText = lng[langKey].gTime;
-        document.getElementById('txt-page-time').innerText = lng[langKey].pTime;
-        document.getElementById('txt-sett-title').innerText = lng[langKey].settTitle;
-        document.getElementById('txt-sett-pages-label').innerText = lng[langKey].settPages;
-        document.getElementById('txt-sett-save').innerText = lng[langKey].settSave;
-        document.getElementById('txt-modal-desc').innerText = lng[langKey].modalDesc;
-        document.getElementById('txt-modal-start').innerText = lng[langKey].modalStart;
-        document.getElementById('txt-abort').innerText = lng[langKey].abort;
-        document.getElementById('txt-finished').innerText = lng[langKey].finished;
-        document.getElementById('txt-report-desc').innerText = lng[langKey].reportDesc;
-        document.getElementById('txt-new-session').innerText = lng[langKey].newSession;
-        document.getElementById('txt-share-wa').innerText = lng[langKey].shareWa;
-        document.getElementById('txt-reset-btn').innerText = lng[langKey].resetBtn;
-        
-        document.getElementById('input-pages').placeholder = lng[langKey].placeholderTxt;
-        document.getElementById('modal-sections-input').placeholder = lng[langKey].placeholderTxt;
-        
-        updatePauseButtonText();
-
-        if (isSessionStarted && document.getElementById('final-screen').style.display === 'block') {
-            endEntireSession(); 
-        } else {
-            renderTabsAndActiveContent();
-        }
-    }
-
-    function updatePauseButtonText() {
-        const pTxt = document.getElementById('pause-text');
-        if(pTxt) {
-            pTxt.innerText = isSectionPaused ? lng[currentLang].resume : lng[currentLang].pause;
-        }
-    }
-
-    // Settings-Anzeige
-    function openSettings() {
-        document.getElementById('input-pages').value = totalPages;
-        document.getElementById('settings-overlay').style.display = 'flex';
-    }
-
-    function cancelSettings() {
-        document.getElementById('settings-overlay').style.display = 'none';
-    }
-
-    function closeSettings() {
-        let inputVal = document.getElementById('input-pages').value;
-        
-        if (inputVal.trim() !== "") {
-            totalPages = parseInt(inputVal) || 5;
-            localStorage.setItem('tt_pages', totalPages);
-        } else {
-            totalPages = 5;
-        }
-
-        document.getElementById('settings-overlay').style.display = 'none';
-        resetEntireSession(); 
-    }
-
-    function renderTabsAndActiveContent() {
-        const tabsContainer = document.getElementById('tabs-container');
-        const contentBox = document.getElementById('active-tab-content');
-        
-        tabsContainer.innerHTML = '';
-        contentBox.innerHTML = '';
-
-        if(currentPage > totalPages) return;
-
-        for (let p = 1; p <= totalPages; p++) {
-            const tab = document.createElement('div');
-            tab.className = 'tab-item';
-            
-            if (p < currentPage) {
-                tab.classList.add('completed-tab');
-                tab.innerText = `📖 ${lng[currentLang].page} ${p} ✓`;
-            } else if (p === currentPage) {
-                tab.classList.add('active-tab');
-                tab.innerText = `📖 ${lng[currentLang].page} ${p}`;
-            } else {
-                tab.classList.add('locked-tab');
-                tab.innerText = `📖 ${lng[currentLang].page} ${p} 🔒`;
-            }
-            tabsContainer.appendChild(tab);
-        }
-
-        setTimeout(() => {
-            const activeTabEl = tabsContainer.querySelector('.active-tab');
-            if (activeTabEl) {
-                tabsContainer.scrollLeft = activeTabEl.offsetLeft - (tabsContainer.offsetWidth / 2) + (activeTabEl.offsetWidth / 2);
-            }
-        }, 100);
-
-        let pData = sessionData[currentPage];
-
-        if (!pData || !pData.isSetup) {
-            let buttonText = lng[currentLang].clickToSetup;
-            contentBox.innerHTML = `
-                <div class="page-title-setup">
-                    <span>${lng[currentLang].page} ${currentPage} 📖</span>
-                    <button class="light-setup-btn placeholder-style pulse-attention" onclick="triggerPageSetup()">${buttonText}</button>
-                </div>
-            `;
-        } else {
-            contentBox.innerHTML = `
-                <div class="page-title-centered">
-                    ${lng[currentLang].page} ${currentPage}
-                </div>
-                <div class="sections-list"></div>
-            `;
-            
-            const list = contentBox.querySelector('.sections-list');
-            for (let s = 1; s <= pData.sectionsCount; s++) {
-                const sRow = document.createElement('div');
-                sRow.className = 'section-item';
-                
-                let isDone = pData.doneSections[s];
-                let isCurrentAccessible = (s === 1 || pData.doneSections[s-1]);
-
-                if (isDone) {
-                    sRow.classList.add('done');
-                    sRow.innerHTML = `<span>${lng[currentLang].section} ${s}</span> <span>${lng[currentLang].done} ✓</span>`;
-                } else if (isCurrentAccessible) {
-                    sRow.innerHTML = `
-                        <span>${lng[currentLang].section} ${s}</span> 
-                        <button class="light-setup-btn pulse-attention" onclick="startSectionReading(${s})">${lng[currentLang].startBtnTxt}</button>
-                    `;
-                } else {
-                    sRow.classList.add('locked');
-                    sRow.innerHTML = `<span>${lng[currentLang].section} ${s} 🔒</span> <span></span>`;
-                }
-                list.appendChild(sRow);
-            }
-        }
-    }
-
-    function triggerPageSetup() {
-        document.getElementById('setup-modal-title').innerText = `${lng[currentLang].page} ${currentPage}`;
-        document.getElementById('setup-overlay').style.display = 'flex';
-    }
-
-    function confirmPageSetup() {
-        let inputVal = document.getElementById('modal-sections-input').value;
-        let sc = 3; 
-
-        if (inputVal.trim() !== "") {
-            sc = parseInt(inputVal) || 3;
-            defaultSections = sc;
-            localStorage.setItem('tt_sections', sc);
-        } else {
-            sc = defaultSections;
-        }
-        
-        sessionData[currentPage].sectionsCount = sc;
-        sessionData[currentPage].isSetup = true;
-        for(let s = 1; s <= sc; s++) sessionData[currentPage].doneSections[s] = false;
-
-        document.getElementById('setup-overlay').style.display = 'none';
-
-        if (!isSessionStarted) {
-            globalStartTime = Date.now();
-            globalInterval = setInterval(updateTimers, 1000);
-            isSessionStarted = true;
-            requestNativeWakeLock();
-            activateWakeLockVideo(); 
-        } else {
-            globalStartTime = Date.now();
-        }
-        
-        pageStartTime = Date.now();
-        pageTimeOffset = 0;
-        
-        saveSessionProgress(); 
-        renderTabsAndActiveContent();
-    }
-
-    function startSectionReading(sNum) {
-        activeSectionNum = sNum;
-        currentTargetClicks = 5;
-        currentClicks = 0;
-        
-        pageStartTime = Date.now();
-        globalStartTime = Date.now();
-        sectionStartTime = Date.now(); 
-        sectionTimeOffset = 0;
-        
-        isSectionPaused = false;
-        isTimerRunning = true;
-
-        const pBtn = document.getElementById('section-pause-btn');
-        document.getElementById('pause-icon').innerText = "⏸️";
-        pBtn.classList.remove('paused');
-        document.getElementById('giant-btn').classList.remove('disabled-state');
-
-        updateClickOverlayUI();
-        updatePauseButtonText();
-        document.getElementById('click-overlay').style.display = 'flex';
-        
-        requestNativeWakeLock();
-        activateWakeLockVideo(); 
-    }
-
-    function toggleSectionPause() {
-        triggerVibrationOnly();
-        const pBtn = document.getElementById('section-pause-btn');
-        const gBtn = document.getElementById('giant-btn');
-        const pIcon = document.getElementById('pause-icon');
-
-        if (!isSectionPaused) {
-            isSectionPaused = true;
-            isTimerRunning = false;
-            
-            sectionTimeOffset += (Date.now() - sectionStartTime);
-            pageTimeOffset += (Date.now() - pageStartTime);
-            globalTimeOffset += (Date.now() - globalStartTime);
-
-            pIcon.innerText = "▶️";
-            pBtn.classList.add('paused');
-            gBtn.classList.add('disabled-state'); 
-            releaseNativeWakeLock();
-            deactivateWakeLockVideo();
-        } else {
-            isSectionPaused = false;
-            isTimerRunning = true;
-            
-            sectionStartTime = Date.now();
-            pageStartTime = Date.now();
-            globalStartTime = Date.now();
-
-            pIcon.innerText = "⏸️";
-            pBtn.classList.remove('paused');
-            gBtn.classList.remove('disabled-state');
-            requestNativeWakeLock();
-            activateWakeLockVideo();
-        }
-        
-        saveSessionProgress(); 
-        updatePauseButtonText();
-    }
-
-    function updateClickOverlayUI() {
-        let pageWord = lng[currentLang].page;
-        let secWord = lng[currentLang].section;
-        document.getElementById('overlay-txt-page').innerText = `${pageWord} ${currentPage} - ${secWord} ${activeSectionNum}`;
-        document.getElementById('overlay-counter').innerText = `${currentClicks}`;
-        
-        const instructionTxt = document.getElementById('circle-instruction-txt');
-        const bottomInfoTxt = document.getElementById('circle-section-txt');
-        const btn = document.getElementById('giant-btn');
-        
-        let isCurrentlyDisabled = isSectionPaused ? ' disabled-state' : '';
-        btn.className = 'giant-circle-btn' + isCurrentlyDisabled; 
-
-        if (currentTargetClicks === 5) {
-            btn.classList.add('circle-round-5');
-            instructionTxt.innerText = lng[currentLang].save_5; 
-            bottomInfoTxt.innerText = lng[currentLang].phase1;
-        } else if (currentTargetClicks === 4) {
-            btn.classList.add('circle-round-4');
-            instructionTxt.innerText = lng[currentLang].rec_4; 
-            bottomInfoTxt.innerText = lng[currentLang].phase2;
-        } else if (currentTargetClicks === 3) {
-            btn.classList.add('circle-round-3');
-            instructionTxt.innerText = lng[currentLang].corr_3; 
-            bottomInfoTxt.innerText = lng[currentLang].phase3;
-        }
-    }
-
-    function handleCircleTouch() {
-        if (isSectionPaused) return; 
-
-        activateWakeLockVideo();
-
-        currentClicks++;
-        if (currentClicks < currentTargetClicks) {
-            document.getElementById('overlay-counter').innerText = `${currentClicks}`;
-            triggerVibrationOnly(); 
-        } else {
-            if (currentTargetClicks === 5) {
-                currentTargetClicks = 4; currentClicks = 0;
-                playGongAndVibrate(); 
-                updateClickOverlayUI();
-            } else if (currentTargetClicks === 4) {
-                currentTargetClicks = 3; currentClicks = 0;
-                playGongAndVibrate(); 
-                updateClickOverlayUI();
-            } else if (currentTargetClicks === 3) {
-                playGongAndVibrate();
-                sessionData[currentPage].doneSections[activeSectionNum] = true;
-                isTimerRunning = false;
-                
-                pageTimeOffset += (Date.now() - pageStartTime);
-                globalTimeOffset += (Date.now() - globalStartTime);
-                
-                document.getElementById('click-overlay').style.display = 'none';
-                
-                saveSessionProgress(); 
-                checkPageCompletion();
-            }
-        }
-    }
-
-    function handleMinusTouch() {
-        if (isSectionPaused) return; 
-        triggerVibrationOnly(); 
-        activateWakeLockVideo();
-        
-        if (currentClicks > 0) {
-            currentClicks--;
-            document.getElementById('overlay-counter').innerText = `${currentClicks}`;
-        } else {
-            if (currentTargetClicks === 4) {
-                currentTargetClicks = 5;
-                currentClicks = 4; 
-                updateClickOverlayUI();
-            } else if (currentTargetClicks === 3) {
-                currentTargetClicks = 4;
-                currentClicks = 3;
-                updateClickOverlayUI();
-            }
-        }
-    }
-
-    function checkPageCompletion() {
-        let pData = sessionData[currentPage];
-        let allDone = true;
-        for(let s = 1; s <= pData.sectionsCount; s++) {
-            if(!pData.doneSections[s]) { allDone = false; break; }
-        }
-        if(allDone) {
-            pData.elapsedTime = pageTimeOffset;
-            pData.isCompleted = true;
-            if(currentPage < totalPages) {
-                currentPage++; 
-                pageTimeOffset = 0;
-                document.getElementById('page-timer').innerText = "00:00";
-                saveSessionProgress(); 
-                renderTabsAndActiveContent();
-            } else {
-                endEntireSession();
-            }
-        } else {
-            renderTabsAndActiveContent();
-        }
-    }
-
-    function closeClickOverlay() {
-        if(isTimerRunning) {
-            pageTimeOffset += (Date.now() - pageStartTime);
-            globalTimeOffset += (Date.now() - globalStartTime);
-            isTimerRunning = false;
-        }
-        document.getElementById('click-overlay').style.display = 'none';
-        saveSessionProgress(); 
-        renderTabsAndActiveContent();
-    }
-
-    function updateTimers() {
-        if (!isTimerRunning) return;
-        
-        let now = Date.now();
-        
-        let diffGlobal = now - globalStartTime + globalTimeOffset;
-        let formattedGlobal = formatTime(diffGlobal);
-        document.getElementById('global-timer').innerText = formattedGlobal;
-        document.getElementById('final-global-timer-big').innerText = formattedGlobal;
-        
-        let diffPage = now - pageStartTime + pageTimeOffset;
-        document.getElementById('page-timer').innerText = formatTime(diffPage);
-        
-        if (document.getElementById('click-overlay').style.display === 'flex') {
-            let diffSection = now - sectionStartTime + sectionTimeOffset;
-            document.getElementById('overlay-section-timer').innerText = formatTime(diffSection);
-        }
-    }
-
-    function endEntireSession() {
-        clearInterval(globalInterval);
-        deactivateWakeLockVideo(); 
-        releaseNativeWakeLock();
-        
-        // Dashboards umschalten
-        document.getElementById('normal-dashboard').style.display = 'none';
-        document.getElementById('final-dashboard').style.display = 'block';
-        
-        let totalComputedMs = 0;
-        for (let p = 1; p <= totalPages; p++) {
-            totalComputedMs += sessionData[p].elapsedTime;
-        }
-        if (totalComputedMs > 0) {
-            document.getElementById('final-global-timer-big').innerText = formatTime(totalComputedMs);
-        }
-
-        document.getElementById('session-area').style.display = 'none';
-        document.getElementById('final-screen').style.display = 'block';
-        
-        const reportList = document.getElementById('page-reports-list');
-        reportList.innerHTML = '';
-        
-        for(let p = 1; p <= totalPages; p++) {
-            const item = document.createElement('div');
-            item.className = 'page-report-item';
-            
-            item.innerHTML = `
-                <span>📖 ${lng[currentLang].page} ${p}</span> 
-                <strong>${formatTime(sessionData[p].elapsedTime)} ${lng[currentLang].unitMin}</strong>
-            `;
-            reportList.appendChild(item);
-        }
-    }
-
-    function shareToWhatsApp() {
-        let totalTimeText = document.getElementById('final-global-timer-big').innerText;
-        
-        let text = `🏆 *Time Tracker Report* 🏆\n\n`;
-        text += `⏱️ *Total Time:* ${totalTimeText}\n`;
-        text += `────────────────────\n`;
-        
-        for (let p = 1; p <= totalPages; p++) {
-            let timeStr = formatTime(sessionData[p].elapsedTime);
-            text += `📖 ${lng[currentLang].page} ${p}: ${timeStr} ${lng[currentLang].unitMin}\n`;
-        }
-        
-        text += `\n🎯 Done successfully! / تم بحمد الله`;
-        
-        let url = "https://api.whatsapp.com/send?text=" + encodeURIComponent(text);
-        window.open(url, '_blank');
-    }
-
-    function formatTime(ms) {
-        if(ms < 0) ms = 0;
-        let totalSeconds = Math.floor(ms / 1000);
-        let hours = Math.floor(totalSeconds / 3600);
-        let minutes = Math.floor((totalSeconds % 3600) / 60);
-        let seconds = totalSeconds % 60;
-        
-        let mm = (minutes < 10 ? "0" : "") + minutes;
-        let ss = (seconds < 10 ? "0" : "") + seconds;
-        
-        if (hours > 0) {
-            let hh = (hours < 10 ? "0" : "") + hours;
-            return hh + ":" + mm + ":" + ss;
-        } else {
-            return mm + ":" + ss;
-        }
-    }
-
-    function triggerVibrationOnly() {
-        if (navigator.vibrate) navigator.vibrate(60); 
-    }
-
-    function playGongAndVibrate() {
-        if (navigator.vibrate) navigator.vibrate(150); 
-        try {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (AudioContext) {
-                const ctx = new AudioContext();
-                const osc = ctx.createOscillator();
-                const gain = ctx.createGain();
-                osc.type = 'sine'; 
-                osc.frequency.setValueAtTime(587.33, ctx.currentTime); 
-                gain.gain.setValueAtTime(0.4, ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
-                osc.connect(gain); gain.connect(ctx.destination);
-                osc.start(); osc.stop(ctx.currentTime + 0.8);
-            }
-        } catch (e) { console.log("Audio API blockiert."); }
-    }
+// ── Init ──────────────────────────────────────────────────────────
+setLang(lang);
 </script>
-
 </body>
 </html>
